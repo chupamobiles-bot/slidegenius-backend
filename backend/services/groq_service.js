@@ -1,5 +1,4 @@
 const Groq = require('groq-sdk');
-
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const STYLE_INSTRUCTIONS = {
@@ -14,133 +13,168 @@ const STYLE_INSTRUCTIONS = {
   bold:         'High-impact language. Use bold statements, dramatic contrasts, and powerful calls to action.',
 };
 
-async function generatePresentationContent(topic, style, slideCount) {
-  const styleGuide = STYLE_INSTRUCTIONS[style] || STYLE_INSTRUCTIONS.professional;
+const DOC_TYPE_CONFIGS = {
+  cover_letter: {
+    role: 'professional career coach and expert cover letter writer',
+    structure: 'Opening Hook → Why This Company/Role → Relevant Achievements (quantified) → Unique Value Proposition → Call to Action',
+    guidance: 'Write for a highly competitive role. Be specific. Avoid cliches. Quantify achievements wherever possible.',
+  },
+  business_proposal: {
+    role: 'senior business development consultant',
+    structure: 'Executive Summary → Problem & Opportunity → Proposed Solution → Methodology → Timeline → Investment & ROI → Risk Mitigation → Next Steps',
+    guidance: 'Include realistic cost estimates and compelling ROI arguments. Make the reader confident this is the right solution.',
+  },
+  meeting_minutes: {
+    role: 'professional executive assistant and certified corporate minute-taker',
+    structure: 'Meeting Info (date/time/venue/chairperson) → Attendees → Agenda Items → Discussion Points → Decisions Made → Action Items (owner + deadline) → Next Meeting',
+    guidance: 'Formal and concise. Action items must have specific owners and deadlines. All decisions must be clearly stated.',
+  },
+  business_plan: {
+    role: 'MBA-level business strategist and startup mentor',
+    structure: 'Executive Summary → Business Overview → Market Analysis (TAM/SAM/SOM) → Products & Services → Competitive Analysis → Go-to-Market → Operations → Management Team → Financial Projections → Funding Requirements',
+    guidance: 'Include realistic market size figures. Write competitive landscape analysis. 3-year projections should be ambitious but credible. Investor-pitch quality.',
+  },
+  assignment: {
+    role: 'expert academic writer and PhD researcher in the relevant field',
+    structure: 'Introduction & Thesis → Literature Review → Methodology → Main Analysis & Arguments → Supporting Evidence → Critical Discussion → Conclusion → References',
+    guidance: 'Undergraduate to postgraduate university level. Formal academic language, clear logical arguments. Critical analysis throughout.',
+  },
+  project_report: {
+    role: 'certified Project Management Professional (PMP)',
+    structure: 'Project Summary & Status → Objectives & Metrics → Work Completed → Milestone Tracker → KPIs → Budget Status → Risk Register → Decisions Required → Next Steps',
+    guidance: 'Use professional PM language. Include specific percentages and metrics. Flag RAG status. Identify critical path items.',
+  },
+  email: {
+    role: 'C-suite executive and business communication expert',
+    structure: 'Subject Line → Salutation → Opening Purpose Statement → Context & Body → Clear Call to Action → Professional Closing',
+    guidance: 'State purpose in first sentence. Busy executives should understand core message in 15 seconds. One specific actionable CTA.',
+  },
+  announcement: {
+    role: 'corporate communications director',
+    structure: 'Headline Announcement → Key Message → Background & Context → Impact on Stakeholders → What Happens Next → Action Required → Contact Information',
+    guidance: 'Inverted pyramid style. Write for a diverse audience. Anticipate questions. Positive forward-looking tone.',
+  },
+  report: {
+    role: 'senior research analyst at a McKinsey-caliber consultancy',
+    structure: 'Executive Summary → Background → Methodology → Key Findings → Analysis → Strategic Implications → Recommendations → Conclusion',
+    guidance: 'Harvard Business Review quality. Specific data, named examples, actionable insights. No filler.',
+  },
+  proposal: {
+    role: 'award-winning proposal writer and senior consultant',
+    structure: 'Executive Summary → Problem Statement → Proposed Solution → Implementation → Timeline → Team → Budget → Expected Outcomes & ROI',
+    guidance: 'Focus on value delivered to client. Include measurable success criteria. Make not choosing this proposal feel risky.',
+  },
+  letter: {
+    role: 'professional business correspondent',
+    structure: 'Sender/Date/Ref → Recipient Details → Subject → Salutation → Purpose Statement → Body → Requested Action & Timeline → Formal Closing',
+    guidance: 'Formal language. Clear and precise. State purpose early and expected response clearly.',
+  },
+  summary: {
+    role: 'C-suite executive advisor in strategic communications',
+    structure: 'Purpose & Scope → Situation Overview → Key Findings → Financial Implications → Critical Risks & Opportunities → Recommended Actions → Conclusion',
+    guidance: 'Write for a CEO with 2 minutes. Lead with most important insight. No summaries of summaries.',
+  },
+  plan: {
+    role: 'senior project strategist and organizational consultant',
+    structure: 'Project Charter → Objectives & Success Metrics → Scope & Deliverables → Work Breakdown Structure → Resource Plan → Timeline & Milestones → Risk Register → Communication Plan → Budget',
+    guidance: 'Specific task durations and dependencies. Identify critical path. Include contingency. SMART success metrics.',
+  },
+  article: {
+    role: 'award-winning journalist and industry thought leader',
+    structure: 'Compelling Headline → Hook Paragraph → Context & Background → Main Argument → Supporting Evidence → Expert Perspectives → Implications & Outlook → Conclusion & CTA',
+    guidance: 'Start with surprising fact or compelling story. Active voice. Clear narrative arc. Educated general audience.',
+  },
+};
 
-  const prompt = `You are a world-class management consultant creating a high-stakes presentation about: "${topic}"
+const TONE_GUIDE = {
+  professional: 'Formal, business-appropriate language. Authoritative, precise, and credible.',
+  friendly:     'Warm, approachable while staying professional. Conversational but credible.',
+  formal:       'Highly formal language for legal, government, or senior official contexts.',
+  concise:      'Extremely concise. Every sentence must earn its place. Target 40% fewer words while preserving all key information.',
+};
+
+async function generatePresentationContent(topic, style, slideCount, language = 'English') {
+  const styleGuide = STYLE_INSTRUCTIONS[style] || STYLE_INSTRUCTIONS.professional;
+  const langNote = language !== 'English'
+    ? `\n\nCRITICAL: Write ALL text values in ${language}. JSON keys remain in English.`
+    : '';
+
+  const prompt = `You are a world-class management consultant creating a presentation about: "${topic}"
 Style: ${styleGuide}
 
-CRITICAL REQUIREMENT: Each slide must contain SUBSTANTIAL, DETAILED content that a professional can actually present. Not vague summaries — real data, real insights, real depth.
+BAD bullet (never do this): "Increased engagement by 25%"
+GOOD bullet (always write like this): "Cloud platforms increased session length by 25%, driven by zero-friction access, cross-device sync, and AI recommendations that surface content within seconds."
 
-EXAMPLE OF BAD bullet (too short — NEVER do this):
-"Increased player engagement by 25%"
+Create ${slideCount} slides using VARIED types:
+- "content": body paragraph (50+ words) + 2 detailed bullets (30-45 words each) + key stat
+- "stat": ONE dramatic number with context
+- "quote": Powerful statement displayed dramatically
+- "divider": Bold section-break
 
-EXAMPLE OF GOOD bullet (detailed, informative — ALWAYS write like this):
-"Cloud gaming platforms have increased average session length by 25% compared to traditional models, driven by zero-friction access to premium titles, cross-device save synchronization, and AI-powered personalized game recommendations that surface relevant content within seconds of login."
-
-Create ${slideCount} slides using these VARIED types:
-- "content": Title + 2-sentence body paragraph + 2 detailed bullets + key stat
-- "stat": ONE dramatic number as the hero with full context
-- "quote": Powerful statement or insight displayed dramatically
-- "divider": Bold section-break statement
-
-Return ONLY valid JSON (absolutely no markdown, no code fences):
+Return ONLY valid JSON:
 {
-  "title": "Compelling Presentation Title",
-  "subtitle": "One powerful subtitle that hooks the audience immediately",
+  "title": "Compelling Title",
+  "subtitle": "One powerful subtitle",
   "slides": [
-    {
-      "type": "content",
-      "title": "Clear Slide Title (5-8 words)",
-      "body": "A detailed 2-3 sentence paragraph providing essential context, background, and framing for this section. Include specific figures, named examples, timeframes, or market conditions. This should be the kind of paragraph a consultant would write in a report — informative, authoritative, and evidence-based.",
-      "bullets": [
-        "First key insight written as a complete thought with specific data, a named example or case study, and a clear implication for the audience — minimum 30 words, maximum 45 words, no vague generalities",
-        "Second critical point with concrete evidence: include a percentage, dollar figure, timeframe, or named organization. Explain the WHY behind the data, not just the number itself. Make it actionable."
-      ],
-      "highlight": "Precise key stat with context: e.g. 'Market projected to reach $847B by 2027, growing at 18.3% CAGR — outpacing all adjacent sectors'"
-    },
-    {
-      "type": "stat",
-      "title": "The Scale of Opportunity",
-      "number": "$847B",
-      "numberLabel": "projected global market value by 2027, up from $198B in 2022 — representing a 4.3x growth multiplier in just 5 years",
-      "context": "This growth rate outpaces traditional software (8% CAGR), SaaS (16% CAGR), and hardware markets (6% CAGR) combined, making this one of the highest-conviction investment categories of the decade."
-    },
-    {
-      "type": "quote",
-      "title": "The Defining Insight",
-      "quote": "A specific, powerful, and memorable statement or real quote that captures a profound truth about ${topic}. Should be thought-provoking enough that the audience will remember it after the presentation ends.",
-      "source": "Full attribution: Author Name, Title, Organization, Year"
-    },
-    {
-      "type": "divider",
-      "message": "Bold section statement that creates anticipation",
-      "subtitle": "Supporting context that sharpens the statement"
-    }
+    {"type":"content","title":"Slide Title","body":"2-3 sentence expert paragraph with specific figures and context.","bullets":["First insight with data, named example, and implication — 30-45 words","Second point with evidence: percentage, dollar figure, or named org. Explain the WHY."],"highlight":"Key stat with context: e.g. '$847B market by 2027 at 18.3% CAGR'"},
+    {"type":"stat","title":"Scale of Opportunity","number":"$847B","numberLabel":"projected value by 2027 — a 4.3x growth multiplier","context":"Full context sentence explaining significance."},
+    {"type":"quote","title":"Defining Insight","quote":"Powerful memorable statement about ${topic}.","source":"Author Name, Title, Organization, Year"},
+    {"type":"divider","message":"Bold section statement","subtitle":"Supporting context"}
   ]
 }
 
-ABSOLUTE RULES:
-1. "body" field: minimum 50 words, 2-3 full sentences, specific and expert-level
-2. Each "bullet": minimum 30 words, maximum 45 words — a complete professional thought
-3. "highlight": include a real-sounding specific number with context (not just a number)
-4. "stat" number: use realistic figures ($B, %, X times, years) with real-sounding precision
-5. First slide: content type — open with a shocking fact or urgent problem
-6. Last slide: content type — strong call-to-action with specific next steps
-7. Use at least 1 stat slide, 1 quote slide, and 1 divider slide for variety
-8. All content must be genuinely expert-level about "${topic}"
-9. Total slides: exactly ${slideCount}`;
+RULES: first slide=content (shocking fact), last slide=content (CTA), use ≥1 stat/quote/divider, exactly ${slideCount} slides, all bullets 30-45 words.${langNote}`;
 
-  const response = await groq.chat.completions.create({
+  const resp = await groq.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
     messages: [
-      {
-        role: 'system',
-        content: 'You are a McKinsey senior partner creating board-level presentations. You write with precision, authority, and depth. Return ONLY valid JSON — no markdown, no code fences, no explanation.',
-      },
+      { role: 'system', content: 'You are a McKinsey senior partner. Return ONLY valid JSON — no markdown, no code fences.' },
       { role: 'user', content: prompt },
     ],
     temperature: 0.6,
     max_tokens: 6000,
   });
-
-  const raw = response.choices[0].message.content.trim();
-  const cleaned = raw
-    .replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
-  return JSON.parse(cleaned);
+  const raw = resp.choices[0].message.content.trim();
+  return JSON.parse(raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/i,'').trim());
 }
 
-async function generateDocumentContent(topic, docType, length) {
+async function generateDocumentContent(topic, docType, length, tone = 'professional', language = 'English') {
   const lengthMap = { short: '500-700', medium: '900-1200', long: '1400-1800' };
   const words = lengthMap[length] || '900-1200';
+  const config = DOC_TYPE_CONFIGS[docType] || DOC_TYPE_CONFIGS.report;
+  const toneGuide = TONE_GUIDE[tone] || TONE_GUIDE.professional;
+  const langNote = language !== 'English'
+    ? `\n\nCRITICAL: Write ALL content in ${language} — title, headings, and body text. JSON keys remain in English.`
+    : '';
 
-  const prompt = `Write a professional, deeply researched ${docType} about: "${topic}"
-Target: ${words} words.
+  const prompt = `You are a ${config.role}.
 
-Return ONLY valid JSON (no markdown, no code fences):
+Write a professional ${docType.replace(/_/g,' ')} about: "${topic}"
+
+Structure: ${config.structure}
+Guidance: ${config.guidance}
+Tone: ${toneGuide}
+Length: ${words} words total${langNote}
+
+Return ONLY valid JSON:
 {
-  "title": "Professional Document Title",
-  "sections": [
-    {
-      "heading": "Section Heading",
-      "content": "Minimum 150 words of expert-level prose per section. Write like a senior consultant authoring a client deliverable. Include specific data points, named examples, industry context, causal explanations, and forward-looking analysis. Avoid generic statements — every sentence must add information value. Use active voice and precise language."
-    }
-  ]
+  "title": "Specific Professional Title",
+  "sections": [{"heading":"Section Heading","content":"Minimum 150 words of expert prose. Include specific data, named examples, causal analysis. No generic statements."}]
 }
 
-Rules:
-- Minimum 5 sections (Executive Summary → Background → Analysis → Implications → Recommendations)
-- Each section: 150-250 words of detailed, expert prose
-- Include realistic statistics, named companies/countries/technologies as examples
-- Write at the level of a Harvard Business Review article about "${topic}"`;
+RULES: Follow the exact structure. Each section ≥150 words. Total ≥${words.split('-')[0]} words. No platitudes. Write as a ${config.role} for a premium client.`;
 
-  const response = await groq.chat.completions.create({
+  const resp = await groq.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
     messages: [
-      {
-        role: 'system',
-        content: 'You are a senior research analyst at a top-tier consultancy. Return only valid JSON with no markdown.',
-      },
+      { role: 'system', content: `You are a ${config.role}. Return only valid JSON with no markdown.` },
       { role: 'user', content: prompt },
     ],
     temperature: 0.55,
     max_tokens: 6000,
   });
-
-  const raw = response.choices[0].message.content.trim();
-  const cleaned = raw
-    .replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
-  return JSON.parse(cleaned);
+  const raw = resp.choices[0].message.content.trim();
+  return JSON.parse(raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/i,'').trim());
 }
 
 module.exports = { generatePresentationContent, generateDocumentContent };

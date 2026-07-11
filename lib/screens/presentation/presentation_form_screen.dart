@@ -1,20 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:permission_handler/permission_handler.dart';
+import '../../app/theme.dart';
 import '../../services/api_service.dart';
 import '../../widgets/loading_overlay.dart';
 import 'presentation_result_screen.dart';
 
 class PresentationFormScreen extends StatefulWidget {
-  const PresentationFormScreen({super.key});
+  final String? initialTopic;
+  const PresentationFormScreen({super.key, this.initialTopic});
 
   @override
   State<PresentationFormScreen> createState() => _PresentationFormScreenState();
 }
 
 class _PresentationFormScreenState extends State<PresentationFormScreen> {
-  final _topicCtrl = TextEditingController();
+  late final TextEditingController _topicCtrl;
   String _style = 'corporate';
   int _slideCount = 8;
+  String _language = 'English';
   bool _loading = false;
+
+  final _speech = stt.SpeechToText();
+  bool _isListening = false;
+
+  static const _languages = [
+    'English', 'Arabic', 'Urdu', 'Hindi', 'Spanish',
+    'French', 'German', 'Chinese', 'Japanese', 'Korean',
+    'Portuguese', 'Turkish', 'Indonesian',
+  ];
 
   final List<Map<String, dynamic>> _templates = [
     {
@@ -67,6 +81,46 @@ class _PresentationFormScreenState extends State<PresentationFormScreen> {
     },
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _topicCtrl = TextEditingController(text: widget.initialTopic ?? '');
+  }
+
+  @override
+  void dispose() {
+    _topicCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _toggleVoice() async {
+    if (_isListening) {
+      await _speech.stop();
+      if (mounted) setState(() => _isListening = false);
+      return;
+    }
+    final status = await Permission.microphone.request();
+    if (!status.isGranted) return;
+    final available = await _speech.initialize(
+      onStatus: (s) {
+        if (s == 'done' || s == 'notListening') {
+          if (mounted) setState(() => _isListening = false);
+        }
+      },
+      onError: (_) { if (mounted) setState(() => _isListening = false); },
+    );
+    if (available && mounted) {
+      setState(() => _isListening = true);
+      await _speech.listen(
+        onResult: (r) {
+          if (mounted) setState(() => _topicCtrl.text = r.recognizedWords);
+        },
+        listenFor: const Duration(seconds: 30),
+        pauseFor: const Duration(seconds: 4),
+      );
+    }
+  }
+
   Future<void> _generate() async {
     final topic = _topicCtrl.text.trim();
     if (topic.isEmpty) {
@@ -79,6 +133,7 @@ class _PresentationFormScreenState extends State<PresentationFormScreen> {
         topic: topic,
         style: _style,
         slideCount: _slideCount,
+        language: _language,
       );
       if (!mounted) return;
       Navigator.pushReplacement(
@@ -143,9 +198,67 @@ class _PresentationFormScreenState extends State<PresentationFormScreen> {
               TextField(
                 controller: _topicCtrl,
                 maxLines: 3,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'e.g. "Future of Electric Vehicles" or "AI in Healthcare 2025"',
-                  hintStyle: TextStyle(fontSize: 13),
+                  hintStyle: const TextStyle(fontSize: 13),
+                  suffixIcon: GestureDetector(
+                    onTap: _toggleVoice,
+                    child: Container(
+                      margin: const EdgeInsets.all(10),
+                      width: 36, height: 36,
+                      decoration: BoxDecoration(
+                        color: _isListening
+                            ? Colors.red.withOpacity(0.1)
+                            : AppTheme.primary.withOpacity(0.07),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        _isListening ? Icons.mic : Icons.mic_none_rounded,
+                        color: _isListening ? Colors.red : AppTheme.primary,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (_isListening)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Row(children: [
+                    Container(width: 8, height: 8,
+                      decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle)),
+                    const SizedBox(width: 6),
+                    const Text('Listening...', style: TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.w500)),
+                  ]),
+                ),
+              const SizedBox(height: 24),
+
+              // Language selector
+              _label('Output Language'),
+              const SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _language,
+                    isExpanded: true,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    borderRadius: BorderRadius.circular(14),
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF94A3B8)),
+                    items: _languages.map((lang) => DropdownMenuItem(
+                      value: lang,
+                      child: Row(children: [
+                        const Icon(Icons.language_rounded, size: 16, color: Color(0xFF94A3B8)),
+                        const SizedBox(width: 8),
+                        Text(lang, style: const TextStyle(fontSize: 14, color: Color(0xFF1E1B4B))),
+                      ]),
+                    )).toList(),
+                    onChanged: (v) => setState(() => _language = v ?? 'English'),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -237,12 +350,6 @@ class _PresentationFormScreenState extends State<PresentationFormScreen> {
         text,
         style: const TextStyle(color: Color(0xFF1E1B4B), fontWeight: FontWeight.w600, fontSize: 14),
       );
-
-  @override
-  void dispose() {
-    _topicCtrl.dispose();
-    super.dispose();
-  }
 }
 
 // ── Template Preview Card ──────────────────────────────────────────────────────

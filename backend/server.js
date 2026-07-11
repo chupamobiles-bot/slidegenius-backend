@@ -4,6 +4,7 @@ const cors = require('cors');
 const presentationRouter = require('./routes/presentation');
 const documentRouter = require('./routes/document');
 const cvRouter = require('./routes/cv');
+const rewriteRouter = require('./routes/rewrite');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +19,7 @@ app.get('/', (req, res) => {
 app.use('/generate/presentation', presentationRouter);
 app.use('/generate/document', documentRouter);
 app.use('/enhance/cv', cvRouter);
+app.use('/rewrite', rewriteRouter);
 
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {

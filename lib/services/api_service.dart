@@ -6,18 +6,24 @@ import '../models/cv_model.dart';
 
 class ApiService {
   // Replace with your Render.com URL after deployment
-  static const String _baseUrl = 'https://slidegenius-api.onrender.com';
+  static const String _baseUrl = 'https://slidegenius-backend.vercel.app';
 
   static Future<String> generatePresentation({
     required String topic,
     required String style,
     required int slideCount,
+    String language = 'English',
   }) async {
     final uri = Uri.parse('$_baseUrl/generate/presentation');
     final response = await http.post(
       uri,
       headers: {'Content-Type': 'application/json'},
-      body: '{"topic":"${_esc(topic)}","style":"$style","slideCount":$slideCount}',
+      body: jsonEncode({
+        'topic': topic,
+        'style': style,
+        'slideCount': slideCount,
+        'language': language,
+      }),
     ).timeout(const Duration(seconds: 120));
     if (response.statusCode == 200) {
       return _saveFile(response.bodyBytes, '${_slug(topic)}.pptx');
@@ -29,15 +35,48 @@ class ApiService {
     required String topic,
     required String docType,
     required String length,
+    String language = 'English',
+    String tone = 'professional',
   }) async {
     final uri = Uri.parse('$_baseUrl/generate/document');
     final response = await http.post(
       uri,
       headers: {'Content-Type': 'application/json'},
-      body: '{"topic":"${_esc(topic)}","docType":"$docType","length":"$length"}',
+      body: jsonEncode({
+        'topic': topic,
+        'docType': docType,
+        'length': length,
+        'language': language,
+        'tone': tone,
+      }),
     ).timeout(const Duration(seconds: 120));
     if (response.statusCode == 200) {
       return _saveFile(response.bodyBytes, '${_slug(topic)}.docx');
+    }
+    throw Exception('Server error ${response.statusCode}: ${response.body}');
+  }
+
+  static Future<String> rewriteDocument({
+    required String topic,
+    required String docType,
+    required String tone,
+    String length = 'medium',
+    String language = 'English',
+  }) async {
+    final uri = Uri.parse('$_baseUrl/rewrite/document');
+    final response = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'topic': topic,
+        'docType': docType,
+        'length': length,
+        'tone': tone,
+        'language': language,
+      }),
+    ).timeout(const Duration(seconds: 120));
+    if (response.statusCode == 200) {
+      return _saveFile(response.bodyBytes, '${_slug(topic)}_$tone.docx');
     }
     throw Exception('Server error ${response.statusCode}: ${response.body}');
   }

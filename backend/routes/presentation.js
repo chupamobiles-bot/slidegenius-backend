@@ -5,10 +5,10 @@ const { createPresentation } = require('../services/file_service');
 
 router.post('/', async (req, res) => {
   try {
-    const { topic, style = 'professional', slideCount = 8 } = req.body;
+    const { topic, style = 'professional', slideCount = 8, language = 'English' } = req.body;
     if (!topic) return res.status(400).json({ error: 'topic required' });
 
-    const content = await generatePresentationContent(topic, style, slideCount);
+    const content = await generatePresentationContent(topic, style, slideCount, language);
     const buffer = await createPresentation(content, style);
 
     const filename = topic.toLowerCase().replace(/[^a-z0-9]+/g, '_').substring(0, 30) + '.pptx';
