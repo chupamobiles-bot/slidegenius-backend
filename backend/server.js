@@ -19,8 +19,10 @@ app.use('/generate/presentation', presentationRouter);
 app.use('/generate/document', documentRouter);
 app.use('/enhance/cv', cvRouter);
 
-app.listen(PORT, () => {
-  console.log(`SlideGenius API running on port ${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`SlideGenius API running on port ${PORT}`);
+  });
+}
 
 module.exports = app;
