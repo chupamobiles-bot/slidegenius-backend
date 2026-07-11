@@ -205,23 +205,32 @@ function addContentSlide(pres, slide, t, num, total) {
   s.addShape('rect', { x:8.35, y:0.35, w:1.35, h:0.45, fill:{color:t.titleBg||t.headerBg} });
   s.addText(`${num} / ${total}`, { x:8.35, y:0.35, w:1.35, h:0.45, fontSize:10, bold:true, color:t.sub, align:'center', valign:'middle' });
 
+  // Body paragraph (if present)
+  let startY = 1.32;
+  if (slide.body) {
+    s.addShape('rect', { x:0.28, y:1.28, w:9.35, h:1.22, fill:{color:t.cardBg}, line:{color:t.cardBorder,width:0.75} });
+    s.addShape('rect', { x:0.28, y:1.28, w:0.08, h:1.22, fill:{color:t.accent} });
+    s.addText(slide.body, { x:0.48, y:1.33, w:9.0, h:1.12, fontSize:12, color:t.bodyText, valign:'middle', wrap:true, charSpacing:0.1 });
+    startY = 2.62;
+  }
+
   // Bullet cards
-  const bullets = (slide.bullets||[]).filter(Boolean).slice(0,3);
-  const cardH = 0.93, gap = 0.1, startY = 1.32;
+  const bullets = (slide.bullets||[]).filter(Boolean).slice(0,2);
+  const cardH = 1.25, gap = 0.1;
 
   bullets.forEach((b, idx) => {
     const y = startY + idx*(cardH+gap);
     // Shadow
-    s.addShape('rect', { x:0.36, y:y+0.07, w:9.35, h:cardH, fill:{color:'C8D4E8',transparency:70} });
+    s.addShape('rect', { x:0.36, y:y+0.07, w:9.35, h:cardH, fill:{color:'C8D4E8',transparency:72} });
     // Card
     s.addShape('rect', { x:0.28, y, w:9.35, h:cardH, fill:{color:t.cardBg}, line:{color:t.cardBorder,width:1} });
     // Number badge
     s.addShape('rect', { x:0.28, y, w:0.5, h:cardH, fill:{color:t.numBg} });
-    s.addText(`${idx+1}`, { x:0.28, y, w:0.5, h:cardH, fontSize:15, bold:true, color:'FFFFFF', align:'center', valign:'middle' });
-    // Top accent line on card
-    s.addShape('rect', { x:0.78, y, w:8.85, h:0.05, fill:{color:t.accent, transparency:65} });
-    // Text
-    s.addText(b, { x:0.86, y:y+0.1, w:8.6, h:cardH-0.15, fontSize:14, color:t.bodyText, valign:'middle', wrap:true });
+    s.addText(`${idx+1}`, { x:0.28, y, w:0.5, h:cardH, fontSize:16, bold:true, color:'FFFFFF', align:'center', valign:'middle' });
+    // Top accent
+    s.addShape('rect', { x:0.78, y, w:8.85, h:0.06, fill:{color:t.accent, transparency:60} });
+    // Text — more room for longer bullets
+    s.addText(b, { x:0.86, y:y+0.1, w:8.6, h:cardH-0.15, fontSize:13.5, color:t.bodyText, valign:'middle', wrap:true });
   });
 
   // Highlight
