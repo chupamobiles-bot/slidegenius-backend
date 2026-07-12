@@ -226,7 +226,7 @@ function addContentSlide(pres, slide, t, num, total) {
       const bullets = (slide.bullets||[]).slice(0,2);
       bullets.forEach((b, i) => {
         const cy = y;
-        s.addShape('rect',    { x:0.5,cy+0.06,w:9.1,h:1.32, fill:{color:'E8F0FE',transparency:60} }); // shadow
+        s.addShape('rect',    { x:0.5,y:cy+0.06,w:9.1,h:1.32, fill:{color:'E8F0FE',transparency:60} }); // shadow
         s.addShape('rect',    { x:0.5,y:cy,w:9.1,h:1.32, fill:{color:'FFFFFF'}, line:{color:t.cardBorder,width:1} });
         s.addShape('ellipse', { x:0.56,y:cy+0.38,w:0.56,h:0.56, fill:{color:t.numBg} });
         s.addText(`${i+1}`, { x:0.56,y:cy+0.38,w:0.56,h:0.56, fontSize:13,bold:true,color:'FFFFFF',align:'center',valign:'middle' });
