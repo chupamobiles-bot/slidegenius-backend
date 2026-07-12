@@ -82,6 +82,63 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
+  void _showCreateSheet() {
+    final topic = _inputCtrl.text.trim();
+    if (topic.isEmpty) return;
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Container(width: 40, height: 4,
+            decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+          const SizedBox(height: 18),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text('Create about: "$topic"',
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppTheme.textDark),
+              maxLines: 2, overflow: TextOverflow.ellipsis),
+          ),
+          const SizedBox(height: 6),
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text('Choose what to generate',
+              style: TextStyle(color: AppTheme.textSoft, fontSize: 13)),
+          ),
+          const SizedBox(height: 12),
+          _sheetTile(ctx, '📊', 'Presentation', 'PPTX slides with speaker notes', 'presentation',
+              const Color(0xFF6C63FF)),
+          _sheetTile(ctx, '📋', 'Business Report', 'Full Word document', 'report',
+              const Color(0xFFEA580C)),
+          _sheetTile(ctx, '💼', 'Business Proposal', 'Professional proposal', 'business_proposal',
+              const Color(0xFFEA580C)),
+          _sheetTile(ctx, '📨', 'Cover Letter', 'Job application letter', 'cover_letter',
+              const Color(0xFFEA580C)),
+          _sheetTile(ctx, '📈', 'Business Plan', 'Investor-ready plan', 'business_plan',
+              const Color(0xFFEA580C)),
+        ]),
+      ),
+    );
+  }
+
+  Widget _sheetTile(BuildContext ctx, String emoji, String title, String sub, String key, Color color) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      leading: Container(
+        width: 42, height: 42,
+        decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+        child: Center(child: Text(emoji, style: const TextStyle(fontSize: 20))),
+      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppTheme.textDark)),
+      subtitle: Text(sub, style: const TextStyle(color: AppTheme.textSoft, fontSize: 12)),
+      trailing: Icon(Icons.arrow_forward_ios_rounded, size: 13, color: color),
+      onTap: () { Navigator.pop(ctx); _openTemplate(key); },
+    );
+  }
+
   void _openTemplate(String key) {
     final topic = _inputCtrl.text.trim();
     if (key == 'presentation') {
@@ -105,6 +162,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.surface,
+      resizeToAvoidBottomInset: false,
       body: CustomScrollView(slivers: [
         SliverAppBar(
           expandedHeight: 400,
@@ -312,6 +370,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: TextField(
                 controller: _inputCtrl,
                 style: const TextStyle(color: Colors.white, fontSize: 14),
+                textInputAction: TextInputAction.go,
+                onSubmitted: (_) => _showCreateSheet(),
                 decoration: InputDecoration(
                   hintText: 'Describe what you need... e.g. "marketing strategy"',
                   hintStyle: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 13),

@@ -379,7 +379,6 @@ class _DocumentFormScreenState extends State<DocumentFormScreen> {
       'summary':           'e.g. "Board briefing on AI strategy and competitive landscape"',
       'plan':              'e.g. "Mobile app development project — 6 month roadmap"',
       'article':           'e.g. "How AI is transforming the financial services industry"',
-      'announcement':      'e.g. "Merger announcement for all employees"',
     };
     return hints[type] ?? 'Describe what this document should cover...';
   }
