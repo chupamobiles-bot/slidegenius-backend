@@ -28,7 +28,7 @@ class ApiService {
     if (response.statusCode == 200) {
       return _saveFile(response.bodyBytes, '${_slug(topic)}.pptx');
     }
-    throw Exception('Server error ${response.statusCode}: ${response.body}');
+    throw Exception(_friendlyError(response.statusCode, response.body));
   }
 
   static Future<String> generateDocument({
@@ -53,7 +53,7 @@ class ApiService {
     if (response.statusCode == 200) {
       return _saveFile(response.bodyBytes, '${_slug(topic)}.docx');
     }
-    throw Exception('Server error ${response.statusCode}: ${response.body}');
+    throw Exception(_friendlyError(response.statusCode, response.body));
   }
 
   static Future<String> rewriteDocument({
@@ -170,6 +170,15 @@ class ApiService {
 
   static String _esc(String s) =>
       s.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+
+  static String _friendlyError(int status, String body) {
+    if (body.contains('rate_limit_exceeded') || body.contains('429')) {
+      return 'AI limit reached for today — Groq free tier allows 100K tokens/day. Please try again in a few hours, or use shorter topics.';
+    }
+    if (status == 500) return 'Server error — please try again in a moment.';
+    if (status == 408 || body.contains('timeout')) return 'Request timed out — please try again.';
+    return 'Error $status — please try again.';
+  }
 
   static String _slug(String s) {
     final clean = s.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');

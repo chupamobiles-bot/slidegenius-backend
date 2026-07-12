@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../../models/cv_model.dart';
 import '../../services/cv_pdf_service.dart';
 import '../../services/api_service.dart';
+import '../../services/usage_service.dart';
 import '../../widgets/loading_overlay.dart';
+import '../pro/pro_screen.dart';
 import 'cv_preview_screen.dart';
 
 class CvFormScreen extends StatefulWidget {
@@ -118,6 +120,10 @@ class _CvFormScreenState extends State<CvFormScreen>
   }
 
   Future<void> _generate() async {
+    if (!await UsageService.canGenerate()) {
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => const ProScreen()));
+      return;
+    }
     final name = _name.text.trim();
     if (name.isEmpty) {
       _showSnack('Please enter your full name');
@@ -130,6 +136,7 @@ class _CvFormScreenState extends State<CvFormScreen>
     });
     try {
       final path = await CvPdfService.generatePdf(_buildCv(), template: _template);
+      await UsageService.recordGeneration();
       if (!mounted) return;
       Navigator.pushReplacement(
         context,

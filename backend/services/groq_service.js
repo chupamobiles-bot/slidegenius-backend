@@ -111,7 +111,7 @@ Return ONLY valid JSON — no markdown, no code fences, no commentary:
       { role: 'user', content: prompt },
     ],
     temperature: 0.72,
-    max_tokens: 8000,
+    max_tokens: 4000,
   });
   const raw = resp.choices[0].message.content.trim();
   return JSON.parse(raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/i,'').trim());
@@ -156,73 +156,115 @@ RULES: Follow the exact structure. Each section ≥150 words. Total ≥${words.s
   return JSON.parse(raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/i,'').trim());
 }
 
+function _safeJsonParse(raw) {
+  try { return JSON.parse(raw); } catch (_) {}
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (match) try { return JSON.parse(match[0]); } catch (_) {}
+  throw new Error('Non-JSON response: ' + raw.substring(0, 150));
+}
+
+async function _groqJson(messages, maxTokens = 4000) {
+  const resp = await groq.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    messages,
+    temperature: 0.1,
+    max_tokens: maxTokens,
+    response_format: { type: 'json_object' },
+  });
+  return _safeJsonParse(resp.choices[0].message.content.trim());
+}
+
 async function parseLinkedInProfile(profileText) {
-  const systemPrompt = `You are an expert CV parser. Extract structured data from LinkedIn profile text.
-You MUST return a single valid JSON object and nothing else — no markdown, no code fences, no explanation text before or after.`;
+  // LinkedIn layout: name/headline → about → experience → education → skills
+  // Education is near the END — use first chunk for personal/experience, last chunk for education
+  const topText  = profileText.substring(0, 7000);   // personal + experience
+  const tailText = profileText.substring(Math.max(0, profileText.length - 4000)); // education + skills
 
-  const userPrompt = `Extract ALL CV information from this LinkedIn profile text.
+  // ── Pass 1: full extraction from top of profile ───────────────────────────
+  const result = await _groqJson([
+    {
+      role: 'system',
+      content: 'You are a CV parser. Return only a valid JSON object with no markdown.',
+    },
+    {
+      role: 'user',
+      content: `Extract all CV data from this LinkedIn profile text.
 
-CRITICAL RULES:
-- You MUST extract the "education" array — look for university names, college names, degree types, years. NEVER return an empty education array if any school/university/college/degree is mentioned anywhere in the text.
-- You MUST extract the "experience" array — look for company names, job titles, date ranges.
-- For education: if you see "Bachelor", "Master", "MBA", "BSc", "MSc", "PhD", "Diploma", or any institution name followed by a year range, add it to education.
-
-Return a JSON object with exactly these keys:
+Return a JSON object with these exact keys:
 {
-  "fullName": "First Last",
-  "title": "Current job title or headline",
+  "fullName": "...",
+  "title": "current role or headline",
   "email": "",
   "phone": "",
   "location": "City, Country",
-  "linkedin": "linkedin URL if found else empty string",
-  "summary": "3-4 sentence professional summary — write one if not explicitly stated",
-  "experience": [
-    {
-      "company": "Company Name",
-      "role": "Job Title",
-      "startDate": "Month Year or Year",
-      "endDate": "Month Year or Year or Present",
-      "description": "2-3 sentences on responsibilities and achievements"
-    }
-  ],
-  "education": [
-    {
-      "institution": "University or School Name",
-      "degree": "Degree type e.g. Bachelor of Science",
-      "field": "Field of study e.g. Computer Science",
-      "year": "Graduation year e.g. 2012"
-    }
-  ],
-  "skills": ["skill1", "skill2"]
+  "linkedin": "",
+  "summary": "3-4 sentence professional summary",
+  "experience": [{"company":"","role":"","startDate":"","endDate":"","description":""}],
+  "education": [{"institution":"","degree":"","field":"","year":""}],
+  "skills": []
 }
 
-LinkedIn profile text:
+LinkedIn text:
 ---
-${profileText.substring(0, 6000)}
----`;
+${topText}
+---`,
+    },
+  ]);
 
-  const resp = await groq.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt },
-    ],
-    temperature: 0.1,
-    max_tokens: 4000,
-    response_format: { type: 'json_object' },
-  });
+  // ── Pass 2: targeted education from TAIL of profile (where it actually is) ─
+  if (!result.education || result.education.length === 0) {
+    try {
+      const eduResult = await _groqJson([
+        {
+          role: 'system',
+          content: 'Extract education history from text. Return JSON only.',
+        },
+        {
+          role: 'user',
+          content: `Find every school, university, college, or academic qualification in this text.
+Look for: institution names, degree types (Bachelor, Master, MBA, BSc, MSc, PhD, Diploma, B.E., B.Tech, etc.), fields of study, and year ranges.
 
-  const raw = resp.choices[0].message.content.trim();
+Return: {"education": [{"institution":"...","degree":"...","field":"...","year":"..."}]}
+If nothing found return: {"education": []}
 
-  // Primary: trust json_object response_format
-  // Fallback: extract first {...} block
-  try {
-    return JSON.parse(raw);
-  } catch (_) {
-    const match = raw.match(/\{[\s\S]*\}/);
-    if (match) return JSON.parse(match[0]);
-    throw new Error('AI returned non-JSON: ' + raw.substring(0, 200));
+Text (bottom section of a LinkedIn profile — education appears here):
+---
+${tailText}
+---`,
+        },
+      ], 1500);
+
+      if (eduResult.education && eduResult.education.length > 0) {
+        result.education = eduResult.education;
+      }
+    } catch (_) {
+      // keep empty array
+    }
   }
+
+  // ── Pass 3: skills from tail if also missing ──────────────────────────────
+  if (!result.skills || result.skills.length === 0) {
+    try {
+      const skillResult = await _groqJson([
+        { role: 'system', content: 'Extract skills list from text. Return JSON only.' },
+        {
+          role: 'user',
+          content: `Find all skills, technologies, tools, and competencies listed in this text.
+Return: {"skills": ["skill1", "skill2", ...]}
+
+Text:
+---
+${tailText}
+---`,
+        },
+      ], 800);
+      if (skillResult.skills && skillResult.skills.length > 0) {
+        result.skills = skillResult.skills;
+      }
+    } catch (_) {}
+  }
+
+  return result;
 }
 
 module.exports = { generatePresentationContent, generateDocumentContent, parseLinkedInProfile };

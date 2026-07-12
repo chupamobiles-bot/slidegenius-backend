@@ -3,7 +3,9 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:permission_handler/permission_handler.dart';
 import '../../app/theme.dart';
 import '../../services/api_service.dart';
+import '../../services/usage_service.dart';
 import '../../widgets/loading_overlay.dart';
+import '../pro/pro_screen.dart';
 import 'presentation_result_screen.dart';
 
 class PresentationFormScreen extends StatefulWidget {
@@ -122,6 +124,10 @@ class _PresentationFormScreenState extends State<PresentationFormScreen> {
   }
 
   Future<void> _generate() async {
+    if (!await UsageService.canGenerate()) {
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => const ProScreen()));
+      return;
+    }
     final topic = _topicCtrl.text.trim();
     if (topic.isEmpty) {
       _showSnack('Please enter a topic');
@@ -135,6 +141,7 @@ class _PresentationFormScreenState extends State<PresentationFormScreen> {
         slideCount: _slideCount,
         language: _language,
       );
+      await UsageService.recordGeneration();
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
