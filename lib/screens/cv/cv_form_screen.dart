@@ -149,59 +149,51 @@ class _CvFormScreenState extends State<CvFormScreen>
 
   // ── LINKEDIN IMPORT ────────────────────────────────────────────────────────
 
+  // Safe string extractor — handles dynamic types without throwing
+  String _s(dynamic v) => v?.toString().trim() ?? '';
+
   void _applyImported(Map<String, dynamic> data) {
     // Personal info
-    if ((data['fullName'] as String? ?? '').isNotEmpty)
-      _name.text = data['fullName'];
-    if ((data['title'] as String? ?? '').isNotEmpty)
-      _title.text = data['title'];
-    if ((data['email'] as String? ?? '').isNotEmpty)
-      _email.text = data['email'];
-    if ((data['phone'] as String? ?? '').isNotEmpty)
-      _phone.text = data['phone'];
-    if ((data['location'] as String? ?? '').isNotEmpty)
-      _location.text = data['location'];
-    if ((data['linkedin'] as String? ?? '').isNotEmpty)
-      _linkedin.text = data['linkedin'];
-    if ((data['summary'] as String? ?? '').isNotEmpty)
-      _summary.text = data['summary'];
+    final name = _s(data['fullName']);
+    final title = _s(data['title']);
+    final email = _s(data['email']);
+    final phone = _s(data['phone']);
+    final location = _s(data['location']);
+    final linkedin = _s(data['linkedin']);
+    final summary = _s(data['summary']);
+    if (name.isNotEmpty) _name.text = name;
+    if (title.isNotEmpty) _title.text = title;
+    if (email.isNotEmpty) _email.text = email;
+    if (phone.isNotEmpty) _phone.text = phone;
+    if (location.isNotEmpty) _location.text = location;
+    if (linkedin.isNotEmpty) _linkedin.text = linkedin;
+    if (summary.isNotEmpty) _summary.text = summary;
 
-    // Experience
+    // Experience — update in-place, add extras, never dispose mid-build
     final expList = (data['experience'] as List?) ?? [];
-    if (expList.isNotEmpty) {
-      // Clear existing and rebuild
-      for (final m in _experiences) {
-        m.values.forEach((c) => c.dispose());
-      }
-      _experiences.clear();
-      for (final exp in expList) {
-        final m = _newExp();
-        m['company']!.text = (exp['company'] as String?) ?? '';
-        m['role']!.text = (exp['role'] as String?) ?? '';
-        m['start']!.text = (exp['startDate'] as String?) ?? '';
-        m['end']!.text = (exp['endDate'] as String?) ?? '';
-        m['desc']!.text = (exp['description'] as String?) ?? '';
-        _experiences.add(m);
-      }
-      if (_experiences.isEmpty) _experiences.add(_newExp());
+    for (int i = 0; i < expList.length; i++) {
+      if (i >= _experiences.length) _experiences.add(_newExp());
+      final exp = expList[i] as Map;
+      _experiences[i]['company']!.text = _s(exp['company']);
+      _experiences[i]['role']!.text = _s(exp['role']);
+      _experiences[i]['start']!.text = _s(exp['startDate']);
+      _experiences[i]['end']!.text = _s(exp['endDate']);
+      _experiences[i]['desc']!.text = _s(exp['description']);
     }
 
-    // Education
+    // Education — same safe in-place update
     final eduList = (data['education'] as List?) ?? [];
-    if (eduList.isNotEmpty) {
-      for (final m in _educations) {
-        m.values.forEach((c) => c.dispose());
-      }
-      _educations.clear();
-      for (final edu in eduList) {
-        final m = _newEdu();
-        m['institution']!.text = (edu['institution'] as String?) ?? '';
-        m['degree']!.text = (edu['degree'] as String?) ?? '';
-        m['field']!.text = (edu['field'] as String?) ?? '';
-        m['year']!.text = (edu['year'] as String?) ?? '';
-        _educations.add(m);
-      }
-      if (_educations.isEmpty) _educations.add(_newEdu());
+    for (int i = 0; i < eduList.length; i++) {
+      if (i >= _educations.length) _educations.add(_newEdu());
+      final edu = eduList[i] as Map;
+      _educations[i]['institution']!.text =
+          _s(edu['institution'] ?? edu['school'] ?? edu['university']);
+      _educations[i]['degree']!.text =
+          _s(edu['degree'] ?? edu['degreeType'] ?? edu['qualification']);
+      _educations[i]['field']!.text =
+          _s(edu['field'] ?? edu['fieldOfStudy'] ?? edu['major'] ?? edu['subject']);
+      _educations[i]['year']!.text =
+          _s(edu['year'] ?? edu['graduationYear'] ?? edu['endDate'] ?? edu['completionYear']);
     }
 
     // Skills
@@ -209,7 +201,7 @@ class _CvFormScreenState extends State<CvFormScreen>
     if (skillList.isNotEmpty) {
       _skills.clear();
       for (final s in skillList) {
-        final str = s as String? ?? '';
+        final str = _s(s);
         if (str.isNotEmpty && !_skills.contains(str)) _skills.add(str);
       }
     }

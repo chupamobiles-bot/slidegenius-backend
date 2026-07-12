@@ -160,35 +160,40 @@ async function parseLinkedInProfile(profileText) {
   const systemPrompt = `You are an expert CV parser. Extract structured data from LinkedIn profile text.
 You MUST return a single valid JSON object and nothing else — no markdown, no code fences, no explanation text before or after.`;
 
-  const userPrompt = `Extract all CV information from this LinkedIn profile text and return it as a JSON object.
+  const userPrompt = `Extract ALL CV information from this LinkedIn profile text.
 
-Use this exact structure (empty string "" for missing fields, empty array [] for missing lists):
+CRITICAL RULES:
+- You MUST extract the "education" array — look for university names, college names, degree types, years. NEVER return an empty education array if any school/university/college/degree is mentioned anywhere in the text.
+- You MUST extract the "experience" array — look for company names, job titles, date ranges.
+- For education: if you see "Bachelor", "Master", "MBA", "BSc", "MSc", "PhD", "Diploma", or any institution name followed by a year range, add it to education.
+
+Return a JSON object with exactly these keys:
 {
   "fullName": "First Last",
-  "title": "Current job title or professional headline",
+  "title": "Current job title or headline",
   "email": "",
   "phone": "",
   "location": "City, Country",
-  "linkedin": "linkedin.com/in/username if identifiable, else empty string",
-  "summary": "Write a compelling 3-4 sentence professional summary based on their experience",
+  "linkedin": "linkedin URL if found else empty string",
+  "summary": "3-4 sentence professional summary — write one if not explicitly stated",
   "experience": [
     {
       "company": "Company Name",
       "role": "Job Title",
       "startDate": "Month Year or Year",
       "endDate": "Month Year or Year or Present",
-      "description": "2-3 sentence description of key responsibilities and achievements"
+      "description": "2-3 sentences on responsibilities and achievements"
     }
   ],
   "education": [
     {
-      "institution": "University/School Name",
-      "degree": "Degree type (BSc, MSc, MBA, etc.)",
-      "field": "Field of study",
-      "year": "Graduation year"
+      "institution": "University or School Name",
+      "degree": "Degree type e.g. Bachelor of Science",
+      "field": "Field of study e.g. Computer Science",
+      "year": "Graduation year e.g. 2012"
     }
   ],
-  "skills": ["Skill 1", "Skill 2"]
+  "skills": ["skill1", "skill2"]
 }
 
 LinkedIn profile text:
