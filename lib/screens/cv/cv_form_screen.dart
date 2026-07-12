@@ -242,7 +242,7 @@ class _CvFormScreenState extends State<CvFormScreen>
               ),
               const SizedBox(height: 16),
               const Row(children: [
-                Icon(Icons.linkedin, color: Color(0xFF0A66C2), size: 24),
+                _LinkedInIcon(size: 24, dark: true),
                 SizedBox(width: 8),
                 Text('Import from LinkedIn',
                     style: TextStyle(
@@ -332,7 +332,7 @@ class _CvFormScreenState extends State<CvFormScreen>
                             _showSnack('✅ LinkedIn profile imported! Review and edit below.');
                           } catch (e) {
                             if (mounted) {
-                              _showSnack('Import failed — please try again');
+                              _showSnack('Import failed: ${e.toString().replaceAll('Exception: ', '')}');
                             }
                           } finally {
                             if (mounted) {
@@ -463,7 +463,7 @@ class _CvFormScreenState extends State<CvFormScreen>
                 ),
                 child: const Row(
                   children: [
-                    Icon(Icons.linkedin, color: Colors.white, size: 28),
+                    _LinkedInIcon(size: 28, dark: false),
                     SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -1014,5 +1014,37 @@ class _CvFormScreenState extends State<CvFormScreen>
     _summary.dispose();
     _skillCtrl.dispose();
     super.dispose();
+  }
+}
+
+/// Inline LinkedIn "in" logo — no external package needed.
+class _LinkedInIcon extends StatelessWidget {
+  final double size;
+  /// [dark] = blue background with white "in" (for banner on white bg)
+  /// [!dark] = white background with blue "in" (for use on blue gradient)
+  final bool dark;
+  const _LinkedInIcon({required this.size, required this.dark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: dark ? const Color(0xFF0A66C2) : Colors.white,
+        borderRadius: BorderRadius.circular(size * 0.18),
+      ),
+      child: Center(
+        child: Text(
+          'in',
+          style: TextStyle(
+            color: dark ? Colors.white : const Color(0xFF0A66C2),
+            fontWeight: FontWeight.w900,
+            fontSize: size * 0.52,
+            height: 1,
+          ),
+        ),
+      ),
+    );
   }
 }

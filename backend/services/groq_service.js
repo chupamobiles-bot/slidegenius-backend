@@ -157,4 +157,67 @@ RULES: Follow the exact structure. Each section ≥150 words. Total ≥${words.s
 }
 
 async function parseLinkedInProfile(profileText) {
-  const prompt = `You ar
+  const systemPrompt = `You are an expert CV parser. Extract structured data from LinkedIn profile text.
+You MUST return a single valid JSON object and nothing else — no markdown, no code fences, no explanation text before or after.`;
+
+  const userPrompt = `Extract all CV information from this LinkedIn profile text and return it as a JSON object.
+
+Use this exact structure (empty string "" for missing fields, empty array [] for missing lists):
+{
+  "fullName": "First Last",
+  "title": "Current job title or professional headline",
+  "email": "",
+  "phone": "",
+  "location": "City, Country",
+  "linkedin": "linkedin.com/in/username if identifiable, else empty string",
+  "summary": "Write a compelling 3-4 sentence professional summary based on their experience",
+  "experience": [
+    {
+      "company": "Company Name",
+      "role": "Job Title",
+      "startDate": "Month Year or Year",
+      "endDate": "Month Year or Year or Present",
+      "description": "2-3 sentence description of key responsibilities and achievements"
+    }
+  ],
+  "education": [
+    {
+      "institution": "University/School Name",
+      "degree": "Degree type (BSc, MSc, MBA, etc.)",
+      "field": "Field of study",
+      "year": "Graduation year"
+    }
+  ],
+  "skills": ["Skill 1", "Skill 2"]
+}
+
+LinkedIn profile text:
+---
+${profileText.substring(0, 6000)}
+---`;
+
+  const resp = await groq.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ],
+    temperature: 0.1,
+    max_tokens: 4000,
+    response_format: { type: 'json_object' },
+  });
+
+  const raw = resp.choices[0].message.content.trim();
+
+  // Primary: trust json_object response_format
+  // Fallback: extract first {...} block
+  try {
+    return JSON.parse(raw);
+  } catch (_) {
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (match) return JSON.parse(match[0]);
+    throw new Error('AI returned non-JSON: ' + raw.substring(0, 200));
+  }
+}
+
+module.exports = { generatePresentationContent, generateDocumentContent, parseLinkedInProfile };

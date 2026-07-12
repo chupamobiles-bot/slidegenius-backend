@@ -583,4 +583,4 @@ async function createDocument(content, docType) {
   return Packer.toBuffer(doc);
 }
 
-module.exports = { createPresentation, createDocument }
+module.exports = { createPresentation, createDocument };
