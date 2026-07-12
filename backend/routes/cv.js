@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Groq = require('groq-sdk');
+const { parseLinkedInProfile } = require('../services/groq_service');
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -56,6 +57,21 @@ Skills: ${JSON.stringify(cv.skills)}`;
     res.json({ success: true, enhanced });
   } catch (err) {
     console.error('CV enhance error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// LinkedIn profile text → structured CV data
+router.post('/parse-profile', async (req, res) => {
+  try {
+    const { profileText } = req.body;
+    if (!profileText || profileText.trim().length < 30) {
+      return res.status(400).json({ error: 'Profile text too short — please paste more content' });
+    }
+    const parsed = await parseLinkedInProfile(profileText);
+    res.json({ success: true, data: parsed });
+  } catch (err) {
+    console.error('LinkedIn parse error:', err);
     res.status(500).json({ error: err.message });
   }
 });

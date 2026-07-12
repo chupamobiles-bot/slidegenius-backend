@@ -146,6 +146,20 @@ class ApiService {
     throw Exception('Enhancement failed: ${response.statusCode}');
   }
 
+  static Future<Map<String, dynamic>> parseLinkedInProfile(String profileText) async {
+    final uri = Uri.parse('$_baseUrl/enhance/cv/parse-profile');
+    final response = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'profileText': profileText}),
+    ).timeout(const Duration(seconds: 60));
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      return body['data'] as Map<String, dynamic>;
+    }
+    throw Exception('Parse failed ${response.statusCode}: ${response.body}');
+  }
+
   static Future<String> _saveFile(List<int> bytes, String filename) async {
     final dir = await getDownloadsDirectory() ??
         await getApplicationDocumentsDirectory();

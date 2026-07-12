@@ -156,4 +156,5 @@ RULES: Follow the exact structure. Each section ≥150 words. Total ≥${words.s
   return JSON.parse(raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/i,'').trim());
 }
 
-module.exports = { generatePresentationContent, generateDocumentContent };
+async function parseLinkedInProfile(profileText) {
+  const prompt = `You ar

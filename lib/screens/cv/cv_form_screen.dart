@@ -17,6 +17,7 @@ class _CvFormScreenState extends State<CvFormScreen>
   late TabController _tab;
   bool _loading = false;
   String _loadingMsg = 'Building your CV...';
+  bool _importLoading = false;
   int _template = 0; // 0=Executive, 1=Emerald, 2=Modern
 
   // Personal
@@ -146,6 +147,219 @@ class _CvFormScreenState extends State<CvFormScreen>
   void _showSnack(String msg) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
 
+  // ── LINKEDIN IMPORT ────────────────────────────────────────────────────────
+
+  void _applyImported(Map<String, dynamic> data) {
+    // Personal info
+    if ((data['fullName'] as String? ?? '').isNotEmpty)
+      _name.text = data['fullName'];
+    if ((data['title'] as String? ?? '').isNotEmpty)
+      _title.text = data['title'];
+    if ((data['email'] as String? ?? '').isNotEmpty)
+      _email.text = data['email'];
+    if ((data['phone'] as String? ?? '').isNotEmpty)
+      _phone.text = data['phone'];
+    if ((data['location'] as String? ?? '').isNotEmpty)
+      _location.text = data['location'];
+    if ((data['linkedin'] as String? ?? '').isNotEmpty)
+      _linkedin.text = data['linkedin'];
+    if ((data['summary'] as String? ?? '').isNotEmpty)
+      _summary.text = data['summary'];
+
+    // Experience
+    final expList = (data['experience'] as List?) ?? [];
+    if (expList.isNotEmpty) {
+      // Clear existing and rebuild
+      for (final m in _experiences) {
+        m.values.forEach((c) => c.dispose());
+      }
+      _experiences.clear();
+      for (final exp in expList) {
+        final m = _newExp();
+        m['company']!.text = (exp['company'] as String?) ?? '';
+        m['role']!.text = (exp['role'] as String?) ?? '';
+        m['start']!.text = (exp['startDate'] as String?) ?? '';
+        m['end']!.text = (exp['endDate'] as String?) ?? '';
+        m['desc']!.text = (exp['description'] as String?) ?? '';
+        _experiences.add(m);
+      }
+      if (_experiences.isEmpty) _experiences.add(_newExp());
+    }
+
+    // Education
+    final eduList = (data['education'] as List?) ?? [];
+    if (eduList.isNotEmpty) {
+      for (final m in _educations) {
+        m.values.forEach((c) => c.dispose());
+      }
+      _educations.clear();
+      for (final edu in eduList) {
+        final m = _newEdu();
+        m['institution']!.text = (edu['institution'] as String?) ?? '';
+        m['degree']!.text = (edu['degree'] as String?) ?? '';
+        m['field']!.text = (edu['field'] as String?) ?? '';
+        m['year']!.text = (edu['year'] as String?) ?? '';
+        _educations.add(m);
+      }
+      if (_educations.isEmpty) _educations.add(_newEdu());
+    }
+
+    // Skills
+    final skillList = (data['skills'] as List?) ?? [];
+    if (skillList.isNotEmpty) {
+      _skills.clear();
+      for (final s in skillList) {
+        final str = s as String? ?? '';
+        if (str.isNotEmpty && !_skills.contains(str)) _skills.add(str);
+      }
+    }
+  }
+
+  void _showLinkedInImportSheet() {
+    final pasteCtrl = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheet) => Padding(
+          padding: EdgeInsets.fromLTRB(
+              20, 16, 20, MediaQuery.of(ctx).viewInsets.bottom + 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle
+              Center(
+                child: Container(
+                    width: 40, height: 4,
+                    decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2))),
+              ),
+              const SizedBox(height: 16),
+              const Row(children: [
+                Icon(Icons.linkedin, color: Color(0xFF0A66C2), size: 24),
+                SizedBox(width: 8),
+                Text('Import from LinkedIn',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: Color(0xFF1E1B4B))),
+              ]),
+              const SizedBox(height: 12),
+              // Instructions
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFBFDBFE)),
+                ),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('How to copy your LinkedIn profile:',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1E40AF),
+                            fontSize: 12)),
+                    SizedBox(height: 6),
+                    Text(
+                      '1. Open LinkedIn in your browser\n'
+                      '2. Go to your profile page\n'
+                      '3. Select All (Ctrl+A) then Copy (Ctrl+C)\n'
+                      '4. Paste below — AI will extract everything automatically',
+                      style: TextStyle(
+                          color: Color(0xFF1E40AF),
+                          fontSize: 11,
+                          height: 1.6),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: pasteCtrl,
+                maxLines: 7,
+                decoration: InputDecoration(
+                  hintText: 'Paste your LinkedIn profile text here...',
+                  hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
+                  filled: true,
+                  fillColor: const Color(0xFFF8FAFC),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFF0A66C2), width: 1.5),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _importLoading
+                      ? null
+                      : () async {
+                          final text = pasteCtrl.text.trim();
+                          if (text.length < 50) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text(
+                                      'Please paste more text from your LinkedIn profile')),
+                            );
+                            return;
+                          }
+                          setSheet(() {});
+                          setState(() {
+                            _importLoading = true;
+                            _loadingMsg =
+                                'AI is reading your LinkedIn profile...\nThis takes about 15 seconds';
+                            _loading = true;
+                          });
+                          Navigator.pop(ctx);
+                          try {
+                            final data =
+                                await ApiService.parseLinkedInProfile(text);
+                            if (!mounted) return;
+                            setState(() => _applyImported(data));
+                            _showSnack('✅ LinkedIn profile imported! Review and edit below.');
+                          } catch (e) {
+                            if (mounted) {
+                              _showSnack('Import failed — please try again');
+                            }
+                          } finally {
+                            if (mounted) {
+                              setState(() {
+                                _loading = false;
+                                _importLoading = false;
+                              });
+                            }
+                          }
+                        },
+                  icon: const Icon(Icons.auto_awesome),
+                  label: const Text('Parse & Auto-fill CV'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0A66C2),
+                    minimumSize: const Size(0, 50),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -233,6 +447,57 @@ class _CvFormScreenState extends State<CvFormScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // LinkedIn Import Banner
+            GestureDetector(
+              onTap: _showLinkedInImportSheet,
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF0A66C2), Color(0xFF0077B5)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.linkedin, color: Colors.white, size: 28),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Import from LinkedIn',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14)),
+                          SizedBox(height: 2),
+                          Text(
+                              'Paste your profile text — AI fills everything automatically',
+                              style: TextStyle(
+                                  color: Colors.white70, fontSize: 11)),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 14),
+                  ],
+                ),
+              ),
+            ),
+            // Divider
+            Row(children: [
+              Expanded(child: Divider(color: Colors.grey.shade300)),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                child: Text('OR FILL MANUALLY',
+                    style: TextStyle(color: Color(0xFF94A3B8), fontSize: 10, fontWeight: FontWeight.w600)),
+              ),
+              Expanded(child: Divider(color: Colors.grey.shade300)),
+            ]),
+            const SizedBox(height: 16),
             _field('Full Name *', _name, hint: 'John Smith'),
             _field('Professional Title', _title, hint: 'Senior Software Engineer'),
             _field('Email', _email,
