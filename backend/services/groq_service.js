@@ -51,16 +51,8 @@ STYLE: ${styleGuide}
 MANDATORY CONTENT QUALITY — ZERO TOLERANCE POLICY
 ════════════════════════════════════════════════
 
-FORBIDDEN — any bullet that looks like these will be REJECTED:
-✗ "AI is transforming the healthcare industry"
-✗ "Companies are seeing significant improvements"
-✗ "This technology offers many benefits"
-✗ Any vague claim without a named company, specific number, and causal explanation
-
-REQUIRED — every bullet MUST look like these examples:
-✓ "DeepMind's AlphaFold 3 mapped 200M protein structures in 2024 — previously a decades-long task — cutting Moderna's drug-candidate identification cycle from 4 years to 14 months and eliminating an estimated $380M per-compound in early-stage R&D spend."
-✓ "Amazon's Rufus AI assistant drove a 23% conversion lift in Q4 2024 ($127B → $156B GMV) by delivering 300ms personalised recommendations — demonstrating that sub-second AI inference converts purchase intent that traditional keyword search permanently misses."
-✓ "Nvidia's H100 GPU generates $35,000/month in cloud rental revenue per unit; with 3.76M H100s deployed by Q3 2024, data centre revenue hit $14.5B — a 206% YoY surge that validates Jensen Huang's decade-long 'compute as infrastructure' thesis."
+FORBIDDEN: vague bullets with no data (e.g. "AI is transforming healthcare", "companies are seeing improvements").
+REQUIRED: every bullet must name a real company + specific metric + year + causal reason (e.g. "DeepMind's AlphaFold 3 mapped 200M proteins in 2024, cutting Moderna's R&D cycle from 4 years to 14 months").
 
 ════════════════════════════════════════════════
 SLIDE CONTENT SPECIFICATIONS
@@ -92,17 +84,13 @@ CREATE EXACTLY ${slideCount} SLIDES — DISTRIBUTION RULES
 • MUST include: at minimum 2 "stat" slides + 1 "quote" slide + 1 "divider" slide spread throughout
 • All remaining slides: "content"
 
-Return ONLY valid JSON — no markdown, no code fences, no commentary:
-{
-  "title": "Bold Specific Title That States a Thesis",
-  "subtitle": "One powerful sentence that encapsulates the core argument about ${topic}",
-  "slides": [
-    {"type":"content","title":"Slide Title That Promises a Specific Insight","body":"90-120 word expert paragraph with ≥2 named organisations, market data with year, causal explanation, and strategic implication for the audience. No vague language. Every sentence adds unique analytical value that cannot be found in a Google search.","bullets":["45-60 word bullet: Named org + specific metric + time period + causal mechanism + audience implication — written at board-presentation quality","Second 45-60 word bullet: Different named org, different metric type, different angle — explains WHY this happened and what it means for the audience's strategy"],"highlight":"★ Specific stat with full context: '$X.XB market by YYYY — X× current size driven by [Factor 1], [Factor 2], and [Factor 3]'"},
-    {"type":"stat","title":"Specific Compelling Metric Title","number":"$X.XB","numberLabel":"plain-language explanation of what this number means including the growth multiplier or before/after comparison","context":"Two to three sentences naming the 3 specific causal drivers behind this number, with named evidence and year references."},
-    {"type":"quote","title":"The Insight That Changes Everything","quote":"A genuinely insightful and non-obvious quote that reframes the audience's understanding of ${topic}","source":"Full Name, Exact Job Title, Organisation Name, Year"},
-    {"type":"divider","message":"A Bold Thesis That Makes The Audience Lean Forward","subtitle":"One sentence that sets up exactly what the next section will prove or reveal"}
-  ]
-}${langNote}`;
+Return ONLY valid JSON:
+{"title":"...","subtitle":"...","slides":[
+  {"type":"content","title":"...","body":"90-120 word expert paragraph","bullets":["45-60 word bullet with named org+metric+year","second bullet"],"highlight":"★ specific stat"},
+  {"type":"stat","title":"...","number":"$X.XB","numberLabel":"...","context":"2-3 sentences with causal drivers"},
+  {"type":"quote","title":"...","quote":"...","source":"Name, Title, Org, Year"},
+  {"type":"divider","message":"Bold thesis statement","subtitle":"Setup sentence"}
+]}${langNote}`;
 
   const resp = await groq.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
@@ -144,13 +132,13 @@ Return ONLY valid JSON:
 RULES: Follow the exact structure. Each section ≥150 words. Total ≥${words.split('-')[0]} words. No platitudes. Write as a ${config.role} for a premium client.`;
 
   const resp = await groq.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
+    model: 'llama-3.1-8b-instant',
     messages: [
       { role: 'system', content: `You are a ${config.role}. Return only valid JSON with no markdown.` },
       { role: 'user', content: prompt },
     ],
     temperature: 0.55,
-    max_tokens: 6000,
+    max_tokens: 3000,
   });
   const raw = resp.choices[0].message.content.trim();
   return JSON.parse(raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/i,'').trim());
@@ -163,9 +151,9 @@ function _safeJsonParse(raw) {
   throw new Error('Non-JSON response: ' + raw.substring(0, 150));
 }
 
-async function _groqJson(messages, maxTokens = 4000) {
+async function _groqJson(messages, maxTokens = 2000) {
   const resp = await groq.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
+    model: 'llama-3.1-8b-instant',
     messages,
     temperature: 0.1,
     max_tokens: maxTokens,
