@@ -1,5 +1,8 @@
-const Groq = require('groq-sdk');
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const OpenAI = require('openai');
+const groq = new OpenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+  baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/'
+});
 
 const STYLE_INSTRUCTIONS = {
   professional: 'Authoritative, data-driven business language. Lead every point with evidence. ROI, market share, strategic implications.',
@@ -93,7 +96,7 @@ Return ONLY valid JSON:
 ]}${langNote}`;
 
   const resp = await groq.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
+    model: 'gemini-2.0-flash',
     messages: [
       { role: 'system', content: 'You are a McKinsey senior partner and world-class keynote speaker. You write presentations that get standing ovations. You NEVER write vague bullets. Every claim has a specific company name, metric, and year. Return ONLY valid JSON — no markdown, no code fences.' },
       { role: 'user', content: prompt },
@@ -132,7 +135,7 @@ Return ONLY valid JSON:
 RULES: Follow the exact structure. Each section ≥150 words. Total ≥${words.split('-')[0]} words. No platitudes. Write as a ${config.role} for a premium client.`;
 
   const resp = await groq.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
+    model: 'gemini-2.0-flash',
     messages: [
       { role: 'system', content: `You are a ${config.role}. Return only valid JSON with no markdown.` },
       { role: 'user', content: prompt },
@@ -153,7 +156,7 @@ function _safeJsonParse(raw) {
 
 async function _groqJson(messages, maxTokens = 2000) {
   const resp = await groq.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
+    model: 'gemini-2.0-flash',
     messages,
     temperature: 0.1,
     max_tokens: maxTokens,

@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const Groq = require('groq-sdk');
+const OpenAI = require('openai');
 const { parseLinkedInProfile } = require('../services/groq_service');
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const groq = new OpenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+  baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/'
+});
 
 router.post('/', async (req, res) => {
   try {
@@ -44,7 +47,7 @@ Education: ${JSON.stringify(cv.education)}
 Skills: ${JSON.stringify(cv.skills)}`;
 
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'gemini-2.0-flash',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.7,
       max_tokens: 1500,
