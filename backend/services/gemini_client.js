@@ -1,7 +1,7 @@
 // gemini_client.js — Native Gemini REST API client
 // Works with all Google AI Studio key formats (AQ. and AIza.)
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = 'gemini-3.6-flash';
 
 async function geminiChat(messages, { max_tokens = 2048, temperature = 0.7, response_format } = {}) {
   const apiKey = process.env.GEMINI_API_KEY;
