@@ -3,7 +3,7 @@
 
 const GEMINI_MODEL = 'gemini-3.6-flash';
 
-async function geminiChat(messages, { max_tokens = 2048, temperature = 0.7, response_format } = {}) {
+async function geminiChat(messages, { max_tokens = 8192, temperature = 0.7, response_format } = {}) {
   const apiKey = process.env.GEMINI_API_KEY;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
 
