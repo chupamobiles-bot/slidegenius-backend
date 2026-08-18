@@ -1,12 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const OpenAI = require('openai');
+const { geminiChat } = require('../services/gemini_client');
 const { parseLinkedInProfile } = require('../services/groq_service');
 
-const groq = new OpenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/'
-});
+const groq = { chat: { completions: { create: (opts) => geminiChat(opts.messages, opts) } } };
 
 router.post('/', async (req, res) => {
   try {

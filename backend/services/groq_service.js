@@ -1,8 +1,5 @@
-const OpenAI = require('openai');
-const groq = new OpenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/'
-});
+const { geminiChat } = require('./gemini_client');
+const groq = { chat: { completions: { create: (opts) => geminiChat(opts.messages, opts) } } };
 
 const STYLE_INSTRUCTIONS = {
   professional: 'Authoritative, data-driven business language. Lead every point with evidence. ROI, market share, strategic implications.',
