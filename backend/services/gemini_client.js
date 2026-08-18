@@ -25,6 +25,7 @@ async function geminiChat(messages, { max_tokens = 8192, temperature = 0.7, resp
     generationConfig: {
       maxOutputTokens: max_tokens,
       temperature,
+      thinkingConfig: { thinkingBudget: 0 },
       ...(response_format?.type === 'json_object' && { responseMimeType: 'application/json' }),
     },
   };
