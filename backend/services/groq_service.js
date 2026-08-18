@@ -132,7 +132,7 @@ Return ONLY valid JSON:
 RULES: Follow the exact structure. Each section ≥150 words. Total ≥${words.split('-')[0]} words. No platitudes. Write as a ${config.role} for a premium client.`;
 
   const resp = await groq.chat.completions.create({
-    model: 'llama-3.1-8b-instant',
+    model: 'llama-3.3-70b-versatile',
     messages: [
       { role: 'system', content: `You are a ${config.role}. Return only valid JSON with no markdown.` },
       { role: 'user', content: prompt },
@@ -153,7 +153,7 @@ function _safeJsonParse(raw) {
 
 async function _groqJson(messages, maxTokens = 2000) {
   const resp = await groq.chat.completions.create({
-    model: 'llama-3.1-8b-instant',
+    model: 'llama-3.3-70b-versatile',
     messages,
     temperature: 0.1,
     max_tokens: maxTokens,

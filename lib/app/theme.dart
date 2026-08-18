@@ -3,24 +3,33 @@ import 'package:flutter/services.dart';
 
 class AppTheme {
   // Brand colours
-  static const Color primary      = Color(0xFF6C63FF);
-  static const Color primaryDeep  = Color(0xFF4834D4);
-  static const Color secondary    = Color(0xFFFF6584);
-  static const Color accent       = Color(0xFF43D8C9);
-  static const Color surface      = Color(0xFFF4F6FB);
-  static const Color cardBg       = Colors.white;
-  static const Color textDark     = Color(0xFF1A1A2E);
-  static const Color textMid      = Color(0xFF4A4A6A);
-  static const Color textSoft     = Color(0xFF94A3B8);
+  static const Color primary      = Color(0xFF6366F1); // indigo
+  static const Color primaryDeep  = Color(0xFF4F46E5);
+  static const Color secondary    = Color(0xFF8B5CF6);
+  static const Color accent       = Color(0xFF3B82F6); // blue accent
 
-  // Hero gradient
+  // Light blue-white surfaces
+  static const Color surface      = Color(0xFFF0F5FF); // very light lavender-white
+  static const Color cardBg       = Colors.white;
+  static const Color inputBg      = Colors.white;
+  static const Color dividerColor = Color(0xFFDDE8FF);
+
+  // Text colours (navy on light bg)
+  static const Color textDark     = Color(0xFF0F2051); // deep navy
+  static const Color textMid      = Color(0xFF2E4A8B); // medium blue-navy
+  static const Color textSoft     = Color(0xFF7B96C8); // soft blue-gray
+
+  // Nav / AppBar colour
+  static const Color navBg        = Color(0xFF0D1F4E); // deep navy blue
+
+  // Hero gradient (home — kept dark for contrast)
   static const LinearGradient heroGradient = LinearGradient(
     colors: [Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  // Feature card gradients
+  // Feature card gradients (unchanged)
   static const LinearGradient presentationGrad = LinearGradient(
     colors: [Color(0xFF6C63FF), Color(0xFFBC6BFF)],
     begin: Alignment.topLeft, end: Alignment.bottomRight,
@@ -34,15 +43,18 @@ class AppTheme {
     begin: Alignment.topLeft, end: Alignment.bottomRight,
   );
 
-  static ThemeData get light {
+  static ThemeData get dark {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
+      systemNavigationBarColor: Color(0xFF0D1F4E),
+      systemNavigationBarIconBrightness: Brightness.light,
     ));
 
     return ThemeData(
       useMaterial3: true,
       fontFamily: 'Roboto',
+      brightness: Brightness.light, // light mode — white cards read well
       colorScheme: ColorScheme.fromSeed(
         seedColor: primary,
         brightness: Brightness.light,
@@ -50,44 +62,44 @@ class AppTheme {
       ),
       scaffoldBackgroundColor: surface,
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.white,
+        backgroundColor: navBg,  // deep navy AppBar
         elevation: 0,
-        scrolledUnderElevation: 0.5,
+        scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: TextStyle(
-          color: textDark,
+          color: Colors.white,
           fontSize: 19,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.4,
         ),
-        iconTheme: IconThemeData(color: textDark),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
         color: cardBg,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: Color(0xFFE8ECF4)),
+          side: const BorderSide(color: Color(0xFFDDE8FF)),
         ),
       ),
-      inputDecorationTheme: InputDecorationTheme(
+      inputDecorationTheme: const InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        contentPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderRadius: BorderRadius.all(Radius.circular(14)),
+          borderSide: BorderSide(color: Color(0xFFD0E1FF)),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderRadius: BorderRadius.all(Radius.circular(14)),
+          borderSide: BorderSide(color: Color(0xFFD0E1FF)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: primary, width: 2),
+          borderRadius: BorderRadius.all(Radius.circular(14)),
+          borderSide: BorderSide(color: primary, width: 2),
         ),
-        hintStyle: const TextStyle(color: textSoft, fontSize: 14),
-        labelStyle: const TextStyle(color: textMid),
+        hintStyle: TextStyle(color: Color(0xFF7B96C8), fontSize: 14),
+        labelStyle: TextStyle(color: Color(0xFF2E4A8B)),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -96,7 +108,8 @@ class AppTheme {
           minimumSize: const Size(double.infinity, 54),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           elevation: 0,
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0.3),
+          textStyle: const TextStyle(
+              fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 0.3),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -110,18 +123,35 @@ class AppTheme {
       ),
       sliderTheme: const SliderThemeData(
         activeTrackColor: primary,
-        inactiveTrackColor: Color(0xFFE0E7FF),
+        inactiveTrackColor: Color(0xFFDDE8FF),
         thumbColor: primary,
-        overlayColor: Color(0x206C63FF),
+        overlayColor: Color(0x206366F1),
         trackHeight: 4,
       ),
       tabBarTheme: const TabBarThemeData(
         labelColor: primary,
-        unselectedLabelColor: textSoft,
+        unselectedLabelColor: Color(0xFF7B96C8),
         indicatorColor: primary,
         labelStyle: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-        unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+        unselectedLabelStyle:
+            TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+      ),
+      dividerTheme: const DividerThemeData(color: Color(0xFFDDE8FF)),
+      chipTheme: const ChipThemeData(
+        backgroundColor: Color(0xFFEEF2FF),
+        labelStyle: TextStyle(color: Color(0xFF6366F1), fontSize: 12),
+        deleteIconColor: Color(0xFF6366F1),
+        side: BorderSide(color: Color(0xFFC7D7FF)),
       ),
     );
   }
+
+  // Light alias so main.dart doesn't need changing
+  static ThemeData get light => dark;
 }

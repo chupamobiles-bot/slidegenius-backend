@@ -163,10 +163,8 @@ class _PresentationFormScreenState extends State<PresentationFormScreen> {
   Widget build(BuildContext context) {
     return Stack(children: [
       Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
         appBar: AppBar(
           title: const Text('Presentation Maker'),
-          backgroundColor: Colors.white,
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -247,7 +245,7 @@ class _PresentationFormScreenState extends State<PresentationFormScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                  border: Border.all(color: const Color(0xFFD0E1FF), width: 1.5),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
@@ -255,13 +253,14 @@ class _PresentationFormScreenState extends State<PresentationFormScreen> {
                     isExpanded: true,
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     borderRadius: BorderRadius.circular(14),
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF94A3B8)),
+                    dropdownColor: Colors.white,
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.textSoft),
                     items: _languages.map((lang) => DropdownMenuItem(
                       value: lang,
                       child: Row(children: [
-                        const Icon(Icons.language_rounded, size: 16, color: Color(0xFF94A3B8)),
+                        const Icon(Icons.language_rounded, size: 16, color: AppTheme.textSoft),
                         const SizedBox(width: 8),
-                        Text(lang, style: const TextStyle(fontSize: 14, color: Color(0xFF1E1B4B))),
+                        Text(lang, style: const TextStyle(fontSize: 14, color: AppTheme.textDark)),
                       ]),
                     )).toList(),
                     onChanged: (v) => setState(() => _language = v ?? 'English'),
@@ -275,7 +274,7 @@ class _PresentationFormScreenState extends State<PresentationFormScreen> {
               const SizedBox(height: 4),
               const Text(
                 '6 professional designs — each with unique layouts, color schemes & slide styles',
-                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+                style: TextStyle(color: AppTheme.textSoft, fontSize: 12),
               ),
               const SizedBox(height: 14),
               GridView.builder(
@@ -319,14 +318,14 @@ class _PresentationFormScreenState extends State<PresentationFormScreen> {
                 value: _slideCount.toDouble(),
                 min: 5, max: 20, divisions: 15,
                 activeColor: const Color(0xFF6366F1),
-                inactiveColor: const Color(0xFFE0E7FF),
+                inactiveColor: const Color(0xFFDDE8FF),
                 onChanged: (v) => setState(() => _slideCount = v.round()),
               ),
               const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('5 slides', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11)),
-                  Text('20 slides', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11)),
+                  Text('5 slides', style: TextStyle(color: AppTheme.textSoft, fontSize: 11)),
+                  Text('20 slides', style: TextStyle(color: AppTheme.textSoft, fontSize: 11)),
                 ],
               ),
 
@@ -340,7 +339,7 @@ class _PresentationFormScreenState extends State<PresentationFormScreen> {
               const Center(
                 child: Text(
                   '⚡ Powered by Groq AI • Usually ready in 20-40 seconds',
-                  style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+                  style: TextStyle(color: AppTheme.textSoft, fontSize: 12),
                 ),
               ),
               const SizedBox(height: 40),
@@ -355,7 +354,7 @@ class _PresentationFormScreenState extends State<PresentationFormScreen> {
 
   Widget _label(String text) => Text(
         text,
-        style: const TextStyle(color: Color(0xFF1E1B4B), fontWeight: FontWeight.w600, fontSize: 14),
+        style: const TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w600, fontSize: 14),
       );
 }
 

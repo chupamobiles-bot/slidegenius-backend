@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../app/theme.dart';
 
 class CvPreviewScreen extends StatelessWidget {
   final String name;
@@ -17,10 +18,8 @@ class CvPreviewScreen extends StatelessWidget {
     final fileName = filePath.split('/').last;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text('CV Ready'),
-        backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(Icons.home_outlined),
@@ -59,13 +58,13 @@ class CvPreviewScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF1E1B4B),
+                color: AppTheme.textDark,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               name,
-              style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
+              style: const TextStyle(color: AppTheme.textSoft, fontSize: 14),
             ),
             const SizedBox(height: 8),
             Container(
@@ -74,6 +73,7 @@ class CvPreviewScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFFD1FAE5),
                 borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFFA7F3D0)),
               ),
               child: const Text(
                 '✅ Generated 100% on-device — no internet needed',
@@ -91,7 +91,7 @@ class CvPreviewScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFD1FAE5)),
+                border: Border.all(color: const Color(0xFFDDE8FF)),
               ),
               child: Row(
                 children: [
@@ -115,14 +115,14 @@ class CvPreviewScreen extends StatelessWidget {
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
-                            color: Color(0xFF1E1B4B),
+                            color: AppTheme.textDark,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
                         const Text(
                           'Saved to Downloads',
                           style: TextStyle(
-                              color: Color(0xFF64748B), fontSize: 11),
+                              color: AppTheme.textSoft, fontSize: 11),
                         ),
                       ],
                     ),

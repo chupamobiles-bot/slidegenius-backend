@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../app/theme.dart';
 import '../../models/cv_model.dart';
 import '../../services/cv_pdf_service.dart';
 import '../../services/api_service.dart';
@@ -247,7 +248,7 @@ class _CvFormScreenState extends State<CvFormScreen>
                     style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
-                        color: Color(0xFF1E1B4B))),
+                        color: AppTheme.textDark)),
               ]),
               const SizedBox(height: 12),
               // Instructions
@@ -364,15 +365,13 @@ class _CvFormScreenState extends State<CvFormScreen>
     return Stack(
       children: [
         Scaffold(
-          backgroundColor: const Color(0xFFF8FAFC),
           appBar: AppBar(
             title: const Text('CV Builder'),
-            backgroundColor: Colors.white,
             bottom: TabBar(
               controller: _tab,
-              labelColor: const Color(0xFF059669),
-              unselectedLabelColor: const Color(0xFF64748B),
-              indicatorColor: const Color(0xFF059669),
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white60,
+              indicatorColor: Colors.white,
               isScrollable: true,
               tabs: const [
                 Tab(text: 'Personal'),
@@ -393,40 +392,42 @@ class _CvFormScreenState extends State<CvFormScreen>
               _designTab(),
             ],
           ),
-          bottomNavigationBar: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _loading ? null : _aiEnhance,
-                      icon: const Icon(Icons.auto_awesome, size: 16),
-                      label: const Text('AI Enhance'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF6366F1),
-                        side: const BorderSide(color: Color(0xFF6366F1)),
-                        minimumSize: const Size(0, 50),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14)),
-                      ),
+          bottomNavigationBar: Container(
+            color: const Color(0xFF0D1F4E),
+            padding: EdgeInsets.fromLTRB(
+              16, 10, 16,
+              MediaQuery.of(context).padding.bottom + 14,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _loading ? null : _aiEnhance,
+                    icon: const Icon(Icons.auto_awesome, size: 16),
+                    label: const Text('AI Enhance'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF6366F1),
+                      side: const BorderSide(color: Color(0xFF6366F1)),
+                      minimumSize: const Size(0, 52),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton.icon(
-                      onPressed: _loading ? null : _generate,
-                      icon: const Icon(Icons.picture_as_pdf_outlined),
-                      label: const Text('Generate CV PDF'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF059669),
-                        minimumSize: const Size(0, 50),
-                      ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton.icon(
+                    onPressed: _loading ? null : _generate,
+                    icon: const Icon(Icons.picture_as_pdf_outlined),
+                    label: const Text('Generate CV PDF'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF059669),
+                      minimumSize: const Size(0, 52),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -492,7 +493,7 @@ class _CvFormScreenState extends State<CvFormScreen>
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10),
                 child: Text('OR FILL MANUALLY',
-                    style: TextStyle(color: Color(0xFF94A3B8), fontSize: 10, fontWeight: FontWeight.w600)),
+                    style: TextStyle(color: AppTheme.textSoft, fontSize: 10, fontWeight: FontWeight.w600)),
               ),
               Expanded(child: Divider(color: Colors.grey.shade300)),
             ]),
@@ -597,11 +598,11 @@ class _CvFormScreenState extends State<CvFormScreen>
             const Text('Add Your Skills',
                 style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1E1B4B),
+                    color: AppTheme.textDark,
                     fontSize: 15)),
             const SizedBox(height: 6),
             const Text('Type a skill and press Add or Enter',
-                style: TextStyle(color: Color(0xFF64748B), fontSize: 12)),
+                style: TextStyle(color: AppTheme.textSoft, fontSize: 12)),
             const SizedBox(height: 16),
             Row(children: [
               Expanded(
@@ -629,13 +630,14 @@ class _CvFormScreenState extends State<CvFormScreen>
                 children: _skills
                     .map((s) => Chip(
                           label: Text(s),
-                          backgroundColor: const Color(0xFFD1FAE5),
+                          backgroundColor: const Color(0xFFEEF2FF),
                           labelStyle: const TextStyle(
-                              color: Color(0xFF065F46),
+                              color: Color(0xFF6366F1),
                               fontWeight: FontWeight.w600,
                               fontSize: 12),
                           deleteIcon: const Icon(Icons.close,
-                              size: 14, color: Color(0xFF065F46)),
+                              size: 14, color: Color(0xFF6366F1)),
+                          side: const BorderSide(color: Color(0xFFC7D7FF)),
                           onDeleted: () =>
                               setState(() => _skills.remove(s)),
                         ))
@@ -644,7 +646,7 @@ class _CvFormScreenState extends State<CvFormScreen>
               const SizedBox(height: 10),
               Text('${_skills.length} skill${_skills.length != 1 ? "s" : ""} added',
                   style: const TextStyle(
-                      color: Color(0xFF64748B), fontSize: 12)),
+                      color: AppTheme.textSoft, fontSize: 12)),
             ],
             const SizedBox(height: 80),
           ],
@@ -659,13 +661,12 @@ class _CvFormScreenState extends State<CvFormScreen>
             const Text('Choose CV Template',
                 style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF1E1B4B),
+                    color: AppTheme.textDark,
                     fontSize: 16)),
             const SizedBox(height: 4),
             const Text(
                 'Select a professional design for your CV',
-                style:
-                    TextStyle(color: Color(0xFF64748B), fontSize: 13)),
+                style: TextStyle(color: AppTheme.textSoft, fontSize: 13)),
             const SizedBox(height: 20),
             _templateCard(
               index: 0,
@@ -764,7 +765,7 @@ class _CvFormScreenState extends State<CvFormScreen>
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected ? const Color(0xFF059669) : Colors.grey.shade200,
+            color: selected ? const Color(0xFF059669) : const Color(0xFFDDE8FF),
             width: selected ? 2.5 : 1,
           ),
           boxShadow: selected
@@ -884,7 +885,7 @@ class _CvFormScreenState extends State<CvFormScreen>
                             style: const TextStyle(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 14,
-                                color: Color(0xFF1E1B4B))),
+                                color: AppTheme.textDark)),
                         if (selected) ...[
                           const SizedBox(width: 8),
                           Container(
@@ -906,7 +907,7 @@ class _CvFormScreenState extends State<CvFormScreen>
                     const SizedBox(height: 4),
                     Text(desc,
                         style: const TextStyle(
-                            color: Color(0xFF64748B),
+                            color: AppTheme.textSoft,
                             fontSize: 11,
                             height: 1.5)),
                   ],
@@ -923,7 +924,7 @@ class _CvFormScreenState extends State<CvFormScreen>
                 border: Border.all(
                   color: selected
                       ? const Color(0xFF059669)
-                      : Colors.grey.shade300,
+                      : const Color(0xFFDDE8FF),
                   width: 2,
                 ),
               ),
@@ -976,7 +977,7 @@ class _CvFormScreenState extends State<CvFormScreen>
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.grey.shade100),
+          border: Border.all(color: const Color(0xFFDDE8FF)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

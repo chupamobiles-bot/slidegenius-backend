@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../app/theme.dart';
 import '../../services/history_service.dart';
 import '../../services/api_service.dart';
 import '../../widgets/loading_overlay.dart';
@@ -96,10 +97,8 @@ class _DocumentResultScreenState extends State<DocumentResultScreen> {
 
     return Stack(children: [
       Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
         appBar: AppBar(
           title: const Text('Document Ready'),
-          backgroundColor: Colors.white,
           automaticallyImplyLeading: false,
           leading: IconButton(
             icon: const Icon(Icons.home_outlined),
@@ -134,13 +133,13 @@ class _DocumentResultScreenState extends State<DocumentResultScreen> {
             Text(
               '${HistoryService.emojiForDocType(widget.docType)}  Document Created!',
               style: const TextStyle(
-                fontSize: 22, fontWeight: FontWeight.w800, color: Color(0xFF1E1B4B)),
+                fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.textDark),
             ),
             const SizedBox(height: 8),
             Text(
               widget.topic,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
+              style: const TextStyle(color: AppTheme.textSoft, fontSize: 14),
             ),
             const SizedBox(height: 32),
 
@@ -151,7 +150,7 @@ class _DocumentResultScreenState extends State<DocumentResultScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFFFEDD5)),
+                border: Border.all(color: const Color(0xFFDDE8FF)),
               ),
               child: Row(children: [
                 Container(
@@ -169,10 +168,10 @@ class _DocumentResultScreenState extends State<DocumentResultScreen> {
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(fileName,
                     style: const TextStyle(
-                      fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF1E1B4B)),
+                      fontWeight: FontWeight.w600, fontSize: 13, color: AppTheme.textDark),
                     overflow: TextOverflow.ellipsis),
                   const Text('Saved to Downloads',
-                    style: TextStyle(color: Color(0xFF64748B), fontSize: 11)),
+                    style: TextStyle(color: AppTheme.textSoft, fontSize: 11)),
                 ])),
                 const Icon(Icons.check_circle, color: Color(0xFF059669), size: 20),
               ]),
@@ -231,8 +230,8 @@ class _DocumentResultScreenState extends State<DocumentResultScreen> {
               label: const Text('Share File'),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 52),
-                foregroundColor: const Color(0xFF64748B),
-                side: const BorderSide(color: Color(0xFFE2E8F0)),
+                foregroundColor: AppTheme.textSoft,
+                side: const BorderSide(color: Color(0xFFDDE8FF)),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
             ),
@@ -306,7 +305,7 @@ class _RewriteSheet extends StatelessWidget {
             child: Container(
               width: 40, height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -316,13 +315,13 @@ class _RewriteSheet extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Text('Rewrite As',
               style: TextStyle(
-                fontSize: 20, fontWeight: FontWeight.w800, color: Color(0xFF1E1B4B))),
+                fontSize: 20, fontWeight: FontWeight.w800, color: AppTheme.textDark)),
           ),
           const SizedBox(height: 4),
           const Align(
             alignment: Alignment.centerLeft,
             child: Text('AI regenerates your document in a new tone (~30 seconds)',
-              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13)),
+              style: TextStyle(color: AppTheme.textSoft, fontSize: 13)),
           ),
           const SizedBox(height: 18),
           ...tones.map((t) {
@@ -337,15 +336,15 @@ class _RewriteSheet extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.05),
+                      color: color.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: color.withOpacity(0.2)),
+                      border: Border.all(color: color.withOpacity(0.3)),
                     ),
                     child: Row(children: [
                       Container(
                         width: 40, height: 40,
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.12),
+                          color: color.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(t['icon'] as IconData, color: color, size: 20),
@@ -354,9 +353,9 @@ class _RewriteSheet extends StatelessWidget {
                       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Text(t['label'] as String,
                           style: const TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 14, color: Color(0xFF1E1B4B))),
+                            fontWeight: FontWeight.w700, fontSize: 14, color: AppTheme.textDark)),
                         Text(t['desc'] as String,
-                          style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+                          style: const TextStyle(color: AppTheme.textSoft, fontSize: 12)),
                       ])),
                       Icon(Icons.arrow_forward_ios_rounded, size: 13, color: color),
                     ]),

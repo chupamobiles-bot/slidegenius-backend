@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../app/theme.dart';
 import '../../services/history_service.dart';
 
 class PresentationResultScreen extends StatefulWidget {
@@ -40,10 +41,8 @@ class _PresentationResultScreenState extends State<PresentationResultScreen> {
     final fileName = widget.filePath.split('/').last;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text('Presentation Ready'),
-        backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(Icons.home_outlined),
@@ -77,13 +76,13 @@ class _PresentationResultScreenState extends State<PresentationResultScreen> {
           const Text(
             '🎉  Presentation Created!',
             style: TextStyle(
-              fontSize: 22, fontWeight: FontWeight.w800, color: Color(0xFF1E1B4B)),
+              fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.textDark),
           ),
           const SizedBox(height: 8),
           Text(
             widget.topic,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
+            style: const TextStyle(color: AppTheme.textSoft, fontSize: 14),
           ),
           const SizedBox(height: 32),
 
@@ -94,7 +93,7 @@ class _PresentationResultScreenState extends State<PresentationResultScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE0E7FF)),
+              border: Border.all(color: const Color(0xFFDDE8FF)),
             ),
             child: Row(children: [
               Container(
@@ -110,11 +109,11 @@ class _PresentationResultScreenState extends State<PresentationResultScreen> {
                 Text(
                   fileName,
                   style: const TextStyle(
-                    fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF1E1B4B)),
+                    fontWeight: FontWeight.w600, fontSize: 13, color: AppTheme.textDark),
                   overflow: TextOverflow.ellipsis,
                 ),
                 const Text('Saved to Downloads',
-                  style: TextStyle(color: Color(0xFF64748B), fontSize: 11)),
+                  style: TextStyle(color: AppTheme.textSoft, fontSize: 11)),
               ])),
               const Icon(Icons.check_circle, color: Color(0xFF059669), size: 20),
             ]),

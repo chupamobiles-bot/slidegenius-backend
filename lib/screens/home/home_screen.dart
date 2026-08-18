@@ -8,6 +8,7 @@ import '../../services/history_service.dart';
 import '../presentation/presentation_form_screen.dart';
 import '../cv/cv_form_screen.dart';
 import '../document/document_form_screen.dart';
+import '../pro/pro_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -94,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Container(width: 40, height: 4,
-            decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+            decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: 18),
           Align(
             alignment: Alignment.centerLeft,
@@ -227,6 +228,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               onTap: () => _openTemplate('report'),
             ),
 
+            // ── Pro Banner ────────────────────────────────────────────────────
+            const SizedBox(height: 20),
+            _ProBanner(),
+
             if (_historyLoaded && _recentFiles.isNotEmpty) ...[
               const SizedBox(height: 36),
               Row(children: [
@@ -259,7 +264,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 16, offset: const Offset(0, 4))],
+        border: Border.all(color: const Color(0xFFDDE8FF)),
+        boxShadow: [BoxShadow(color: const Color(0xFF6366F1).withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(18),
@@ -285,7 +291,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
-                  border: isLast ? null : const Border(bottom: BorderSide(color: Color(0xFFF0F4F8))),
+                  border: isLast ? null : const Border(bottom: BorderSide(color: Color(0xFFF0F5FF))),
                 ),
                 child: Row(children: [
                   Container(
@@ -425,8 +431,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildStats() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 16, offset: const Offset(0, 4))]),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFDDE8FF)),
+        boxShadow: [BoxShadow(color: const Color(0xFF6366F1).withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
+      ),
       child: Row(children: [
         _statItem(Icons.palette_outlined,     '6',    'Templates'),
         _statItem(Icons.bolt_outlined,        '30s',  'Avg. Speed'),
@@ -449,10 +459,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [AppTheme.primary.withOpacity(0.08), AppTheme.secondary.withOpacity(0.06)],
-          begin: Alignment.topLeft, end: Alignment.bottomRight),
+        gradient: LinearGradient(
+          colors: [AppTheme.primary.withOpacity(0.08), AppTheme.secondary.withOpacity(0.05)],
+          begin: Alignment.topLeft, end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppTheme.primary.withOpacity(0.15)),
+        border: Border.all(color: AppTheme.primary.withOpacity(0.18)),
       ),
       child: Row(children: [
         Container(width: 40, height: 40, decoration: BoxDecoration(gradient: AppTheme.presentationGrad, shape: BoxShape.circle),
@@ -470,6 +482,125 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: const Text('FREE', style: TextStyle(color: Color(0xFF16A34A), fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
         ),
       ]),
+    );
+  }
+}
+
+// ── Pro Banner ────────────────────────────────────────────────────────────────
+class _ProBanner extends StatelessWidget {
+  const _ProBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+          context, MaterialPageRoute(builder: (_) => const ProScreen())),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF1A1640), Color(0xFF251950)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+              color: const Color(0xFF6366F1).withOpacity(0.45), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF6366F1).withOpacity(0.22),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Icon
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF6366F1).withOpacity(0.45),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.auto_awesome, color: Colors.white, size: 26),
+            ),
+            const SizedBox(width: 14),
+            // Text
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Text(
+                        'OfficePilot AI Pro',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF6366F1).withOpacity(0.25),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                              color: const Color(0xFF6366F1).withOpacity(0.6)),
+                        ),
+                        child: const Text('\$4.99',
+                            style: TextStyle(
+                                color: Color(0xFF818CF8),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  const Text(
+                    'Unlimited AI • Pay once, use forever',
+                    style: TextStyle(color: Colors.white54, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            // Unlock button
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text(
+                'Unlock',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

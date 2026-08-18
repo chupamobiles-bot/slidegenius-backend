@@ -154,10 +154,8 @@ class _DocumentFormScreenState extends State<DocumentFormScreen> {
     final ct = _currentDocType!;
     return Stack(children: [
       Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
         appBar: AppBar(
           title: const Text('Document Generator'),
-          backgroundColor: Colors.white,
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -252,7 +250,7 @@ class _DocumentFormScreenState extends State<DocumentFormScreen> {
                         color: selected ? const Color(0xFFEA580C) : Colors.white,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: selected ? const Color(0xFFEA580C) : const Color(0xFFE2E8F0),
+                          color: selected ? const Color(0xFFEA580C) : const Color(0xFFDDE8FF),
                           width: 2,
                         ),
                         boxShadow: selected
@@ -265,7 +263,7 @@ class _DocumentFormScreenState extends State<DocumentFormScreen> {
                         Text(
                           t['label'] as String,
                           style: TextStyle(
-                            color: selected ? Colors.white : const Color(0xFF1E1B4B),
+                            color: selected ? Colors.white : AppTheme.textDark,
                             fontWeight: FontWeight.w600, fontSize: 12,
                           ),
                         ),
@@ -292,19 +290,19 @@ class _DocumentFormScreenState extends State<DocumentFormScreen> {
                           color: selected ? const Color(0xFFEA580C) : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: selected ? const Color(0xFFEA580C) : const Color(0xFFE2E8F0),
+                            color: selected ? const Color(0xFFEA580C) : const Color(0xFFDDE8FF),
                             width: 2,
                           ),
                         ),
                         child: Column(children: [
                           Text(l['label'] as String,
                             style: TextStyle(
-                              color: selected ? Colors.white : const Color(0xFF1E1B4B),
+                              color: selected ? Colors.white : AppTheme.textDark,
                               fontWeight: FontWeight.w700, fontSize: 13,
                             )),
                           Text(l['desc'] as String,
                             style: TextStyle(
-                              color: selected ? Colors.white70 : const Color(0xFF94A3B8),
+                              color: selected ? Colors.white70 : AppTheme.textSoft,
                               fontSize: 10,
                             )),
                         ]),
@@ -321,7 +319,7 @@ class _DocumentFormScreenState extends State<DocumentFormScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                  border: Border.all(color: const Color(0xFFD0E1FF), width: 1.5),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
@@ -329,6 +327,7 @@ class _DocumentFormScreenState extends State<DocumentFormScreen> {
                     isExpanded: true,
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     borderRadius: BorderRadius.circular(14),
+                    dropdownColor: Colors.white,
                     icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.textSoft),
                     items: _languages.map((lang) => DropdownMenuItem(
                       value: lang,
@@ -393,6 +392,6 @@ class _DocumentFormScreenState extends State<DocumentFormScreen> {
   Widget _label(String text) => Text(
     text,
     style: const TextStyle(
-      color: Color(0xFF1E1B4B), fontWeight: FontWeight.w600, fontSize: 14),
+      color: AppTheme.textDark, fontWeight: FontWeight.w600, fontSize: 14),
   );
 }

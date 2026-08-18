@@ -20,7 +20,7 @@ class SlideGeniusApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'OfficePilot AI',
-      theme: AppTheme.light,
+      theme: AppTheme.dark,
       debugShowCheckedModeBanner: false,
       home: SplashScreen(showOnboarding: showOnboarding),
     );
