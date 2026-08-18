@@ -24,7 +24,7 @@ app.get('/test-gemini', async (req, res) => {
       [{ role: 'user', content: 'Say hello in one word.' }],
       { max_tokens: 10 }
     );
-    res.json({ ok: true, reply: result.choices[0].message.content, key_set: !!process.env.GEMINI_API_KEY });
+    res.json({ ok: true, reply: result.choices[0].message.content, raw: result._raw, key_set: !!process.env.GEMINI_API_KEY });
   } catch (e) {
     res.json({ ok: false, error: e.message, key_set: !!process.env.GEMINI_API_KEY });
   }

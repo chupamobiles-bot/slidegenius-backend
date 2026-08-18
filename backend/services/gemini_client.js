@@ -41,10 +41,13 @@ async function geminiChat(messages, { max_tokens = 2048, temperature = 0.7, resp
   }
 
   const data = await resp.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+  // Gemini may return thinking parts + text parts — grab last text part
+  const parts = data.candidates?.[0]?.content?.parts || [];
+  const text = parts.filter(p => p.text).map(p => p.text).join('') || '';
 
   // Return in OpenAI-compatible shape so existing code works unchanged
-  return { choices: [{ message: { content: text, role: 'assistant' } }] };
+  return { choices: [{ message: { content: text, role: 'assistant' } }], _raw: data };
 }
 
 module.exports = { geminiChat };
